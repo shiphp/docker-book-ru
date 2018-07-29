@@ -1,46 +1,46 @@
-# Chapter 1. Introduction to Docker
+# Глава 1. Введение в Docker
 
-Since its first release in 2013, Docker has become the container engine of choice for many developers, and it may be replacing a virtual machine near you soon. This book offers a step-by-step guide that will walk you through the process of building a real PHP web application using Docker while explaining the basics of the platform along the way.
+С момента своего первого выпуска в 2013 году Docker стал двигателем контейнеров для многих разработчиков, и вскоре он может заменить виртуальную машину рядом с вами. Эта книга предлагает пошаговое руководство, которое проведёт вас через процесс создания реального веб-приложения на PHP с использованием Docker, объясняя основы платформы по пути.
 
-The application we build in this book will do many of the key things that PHP developers need to do on a daily basis, including:
+В создаваемой в этой книге приложении будут использоваться такие ключевые возможности, которые PHP-разработчики выполняют ежедневно, включая:
 
-* Installing dependencies using [Composer](https://getcomposer.org/).
+* Установка зависимостей, используя [Composer](https://getcomposer.org/).
 
-* Using a web framework ([SlimPHP](https://www.slimframework.com/)) for routing.
+* Использование фреймворка ([SlimPHP](https://www.slimframework.com/)) для маршрутизации.
 
-* Getting data from a third-party API.
+* Получение данных с стороннего API.
 
-* Saving data to a database.
+* Сохранение данных в базу данных.
 
-* Securely setting environmental variables.
+* Безопасная настройка переменных среды.
 
-This book was written for seasoned PHP developers who want to learn to develop web applications with Docker, learn how Docker works, and like learning by building real, working applications. Once you've completed this book, you'll be ready for more advanced Docker topics, and I've included some resources to help you at the end.
+Эта книга была написана для опытных разработчиков PHP, которые хотят научиться разрабатывать веб-приложения с помощью Docker, узнать, как работает Docker, и, как обучение, создавать реальные рабочие приложения. После того, как вы закончите эту книгу, вы будете готовы к более продвинутым темам Docker, поэтому я включил некоторые информационные ресурсы, которые помогут вам в конце.
 
-All the code I include in this book is open source and [freely available on Github](https://github.com/shiphp/weather-app). If you see any problems or you want to suggest an improvement, feel free to make a pull request. Finally, check [www.shiphp.com](https://www.shiphp.com/) often for blog posts, training, and new books on both Docker and PHP.
+Весь код, который я включаю в эту книгу находится в открытом доступе и [свободно доступен на GitHub](https://github.com/shiphp/weather-app). Если вы видите какие-либо проблемы или хотите предложить улучшение, не стесняйтесь создать пулреквест. Наконец, часто проверяйте на [www.shiphp.com](https://www.shiphp.com/) посты в блогах, новые обучающие материалы и книги как по Docker, так по PHP.
 
-## What is Docker?
+## Что такое Docker?
 
-Docker is a platform for managing and running containers. Containers are like [virtual machines](https://en.wikipedia.org/wiki/Virtual_machine), but they don't actually emulate the whole operating system. Instead, all of the containers you run share the same underlying kernel with the host machine, which means that they're much lighter-weight than virtual machines. Because of this, containers are very efficient, and most real-world applications run many containers at once. Docker helps you link these containers together using [networks](https://docs.docker.com/engine/userguide/networking/) of containers, and helps you define your containers using [Docker Compose](https://docs.docker.com/compose/) configuration files. While this book doesn't cover these topics in detail, it will get you started, and more in-depth material is available at [www.shiphp.com](https://www.shiphp.com/).
+Docker — это платформа для управления и запуска контейнеров. Контейнеры похожи на [виртуальные машины](https://ru.wikipedia.org/wiki/%D0%92%D0%B8%D1%80%D1%82%D1%83%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%BC%D0%B0%D1%88%D0%B8%D0%BD%D0%B0), но они на самом деле не эмулируют всю операционную систему. Вместо этого все контейнеры, которые вы используете, используют одно и то же основное ядро с хост-машиной, а это означает, что они намного легче, чем виртуальные машины. Из-за этого контейнеры очень эффективны, и большинство реальных приложений запускают сразу несколько контейнеров. Docker помогает связать эти контейнеры вместе с помощью контейнеров [networks](https://docs.docker.com/engine/userguide/networking/) и поможет вам определить ваши контейнеры с помощью [Docker Compose](https: // docs. docker.com/compose/). Хотя эта книга не затрагивает эти темы подробно, она поможет вам начать работу, а более углублённые материалы доступны на [www.shiphp.com](https://www.shiphp.com/).
 
 {width=100%}
-![Diagram 1: Docker Container vs. Virtual Machine](images/diagram1.png)
+![Диаграмма 1: Контейнер Docker по сравнению с виртуальной машиной](images/diagram1.png)
 
-## Why Docker?
+## Почему Docker?
 
-PHP developers who are familiar with virtual machines or have used [Vagrant](https://www.sitepoint.com/5-easy-ways-getting-started-php-vagrant/) will most easily understand containers by comparing them with virtual machines. The important difference between containers and virtual machines in practice is that you will rarely use *one single* Docker container for your whole application. Instead, you will run your PHP code in one container, your web server in another container, and your database in third container. Some applications I've worked on use dozens of linked containers to operate!
+Разработчики PHP, которые знакомы с виртуальными машинами или использовали [Vagrant](https://www.sitepoint.com/5-easy-ways-getting-started-php-vagrant/), будут легче всего понимать контейнеры, сравнивая их с виртуальными машинами. Важное отличие между контейнерами и виртуальными машинами на практике заключается в том, что вы редко используете *один-единственный* контейнер Docker для всего вашего приложения. Вместо этого вы запустите свой PHP-код в одном контейнере, веб-сервер в другом контейнере, а базу данных в третьем контейнере. Некоторые приложения, над которыми я работал, используют десятки связанных между собой контейнеров для функционирования!
 
-If you haven't used a virtual machine before, Docker containers can still help you improve your development workflow. Developers who work on teams that run PHP and Apache natively on their operating system often run into the "works on my machine" problem. One team member updates the web application and everything seems to work fine, but then when the application is deployed to the server or run by another team member, it mysteriously breaks. Docker solves these problems by allowing developers to set up and share replicable development environments, and then *test and deploy applications in exactly the same state* using containers.
+Если вы раньше не использовали виртуальную машину, Docker-контейнеры могут помочь вам улучшить рабочий процесс разработки. Разработчики, которые работают с командами, которые запускают PHP и Apache изначально в своей операционной системе, часто сталкиваются с проблемой «это работает на моей машине». Один разработчик команды обновляет приложение, и все работает нормально, но затем, когда приложение развёртывается на сервере или запускается другим членом команды, оно таинственно ломается. Docker решает эти проблемы, позволяя разработчикам создавать и распространять реплицируемые (воспроизводимые) окружения для разработки, а затем *тестировать и развёртывать (деплоить) приложения в точно таком же состоянии*, используя контейнеры.
 
-At this point you may want to read a little more about Docker. While this book will walk you through the process of building and running a PHP web application on Docker, it does not attempt to cover the inner-workings of Docker, containers, or operating system virtualization. You can read more on Docker and many of these related topics on [Docker's website](https://www.docker.com/what-docker).
+На данный момент вы можете прочитать немного больше о Docker. В то время как эта книга проведёт вас через процесс создания и запуска веб-приложения PHP на Docker, она не пытается охватить внутреннюю работу Docker, контейнеров или виртуализацию операционной системы. Вы можете прочитать больше о Docker и много связанных с ним тем на [сайте Docker](https://www.docker.com/what-docker).
 
-## What can I expect from this book?
+## Что я могу ожидать от этой книги?
 
-While the computer science behind containers is an interesting topic, this book takes a pragmatic approach. Many PHP developers (including myself) are hands-on learners, so I wrote this book to *help people who learn by doing*. Along the way, I've included some diagrams for visual learners, code samples (as well as [a complete code repo on Github](https://github.com/shiphp/weather-app)), and links to free and paid resources to learn more about each of the topics covered.
+Хотя компьютерная наука за контейнерами — интересная тема, эта книга использует прагматичный подход. Многие PHP-разработчики (включая меня) — самоучки, поэтому я написал эту книгу, чтобы *помочь тем, кто обучается в ходе практической деятельности*. На этом пути для лучшего понимания я включил несколько диаграмм, а также примеры кода (вместе с [завершённым кодом в репозитории на GitHub] (https://github.com/shiphp/weather-app)) и ссылки на бесплатные и платные ресурсы, чтобы узнать больше о каждой из затронутых тем.
 
-Reading the [Docker documentation](https://docs.docker.com/) is a good idea, but I find that starting out with a working application gives me better context for the docs, and deepens my understanding of what I read there. If you're a PHP developer, this book will take you on a journey to build your first application and give you that foundation you need to truly understand how Docker works and how you could use it to build better software.
+Чтение документации по [Docker](https://docs.docker.com/) — хорошая идея, но я считаю, что начало работы с рабочим приложением даёт мне лучший контекст для документации и углубляет моё понимание того, что я там читаю. Если вы разработчик PHP, в этой книге вы отправитесь в путешествие, чтобы создать своё первое приложение и дать вам тот фундамент, который вам нужно по-настоящему понять, как работает Docker, и как вы можете использовать его для создания лучшего программного обеспечения.
 
-The application we build in this book is simple [REST](https://stackoverflow.com/questions/671118/what-exactly-is-restful-programming) API, but it covers most of the typical problems that PHP developers will need to solve when using Docker. Throughout the course of building this application, I'll show you to install packages using [Composer](https://getcomposer.org/), get data from a third party API, save data to a database, and use environmental variables with Docker. Rather than explain everything up front, most details will be uncovered as you build the application.
+Приложение, которое мы создаём в этой книге, является простым [REST](https://stackoverflow.com/questions/671118/what-exactly-is-restful-programming) API, но оно охватывает большинство типичных проблем, которые потребуется решать PHP-разработчикам при использовании Docker. На протяжении всего процесса создания этого приложения я покажу вам установку пакетов с помощью [Composer](https://getcomposer.org/), получение данных из стороннего API, сохранение данных в базе данных и использование переменных окружения с помощью Docker. Вместо того, чтобы объяснять все прямо сейчас, большинство подробностей будут раскрыто при создании приложения.
 
-The best way to read this book would be to sit down with it and your computer for an afternoon and work through it. Hopefully by the end, you'll be ready to start using Docker for your next PHP project.
+Лучшим способом прочитать эту книгу было бы сесть с ней и компьютером после обеда и проработать её. Надеюсь, к концу вы будете готовы начать использовать Docker для своего следующего проекта PHP.
 
-There are a few prerequisites to this book. You should have an understanding of [what PHP is](http://php.net/manual/en/intro-whatis.php) and the basics of its syntax, you should know how to open your computer's terminal and run PHP scripts from it, and you should have version 17 of the community edition of [Docker (available for Mac, Windows, or Linux)](https://www.docker.com/community-edition) installed on your computer. Assuming you've got those things, let's get started!
+В этой книге есть несколько предпосылок. У вас должно быть понимание [того, что такое PHP](http://php.net/manual/ru/intro-whatis.php) и основы его синтаксиса, вы должны знать, как открыть терминал на вашем компьютере и запускать PHP-скрипты из-под консоли, и у вас должна быть версия 17 общедоступной (community) версии [Docker (доступно для Mac, Windows или Linux)] (https://www.docker.com/community-edition), установленной на вашем компьютере. Предполагая, что у вас всё это есть, давайте начнём!
