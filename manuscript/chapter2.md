@@ -1,38 +1,38 @@
-# Chapter 2. Running a PHP Script in Docker
+# Глава 2. Выполнение PHP-скрипта в Docker
 
-Before we start building our application, it's helpful to get an idea of how Docker works by simply running a PHP script in Docker. Let's start by writing a classic Hello World! script in PHP:
+Прежде чем мы начнём создавать наше приложение, полезно получить представление о том, как работает Docker, просто выполняя PHP-скрипт в Docker. Давайте начнём с написания классического скрипта «Привет, мир!» в PHP:
 
 {title="hello.php", linenos=off, lang=php}
 ~~~~~~~
 <?php
-echo "Hello World!";
+echo 'Привет, мир!';
 ~~~~~~~
 
-You can run this script in a VM or on your laptop (assuming you have PHP installed) by running php hello.php from your terminal. You should see the output Hello World! just as we typed it above.
+Вы можете запустить этот скрипт в виртуальной машине или на своём ноутбуке (если у вас установлен PHP), запустив `php hello.php` из вашего терминала. Вы должны увидеть вывод `Привет, мир!` как мы напечатали его выше.
 
-## Introduction to Docker Images
+## Введение в образы Docker
 
-Docker runs every process within a container. All these containers run on a "host" machine, which will be your computer in this book. Once your application is ready for a production environment, the server (or several servers) will act as your Docker host.
+Docker запускает каждый процесс внутри контейнера. Все эти контейнеры запускаются на «хост-машине», которая будет вашим компьютером в этой книге. Когда ваше приложение будет готово к продакшен-среде, сервер (или несколько серверов) будет выступать в качестве вашего хоста Docker.
 
-Behind each running container is an "image." Docker images are created and maintained by software developers using Dockerfiles. In other words, if you want to create your own Docker image from scratch, you first make a new Dockerfile, then *build* an image from it, then *run* a container from the image.
+За каждым запущенным контейнером находится «образ» (image). Образы Docker создаются и поддерживаются разработчиками программного обеспечения, используя файлы `Dockerfile`. Другими словами, если вы хотите создать свой образ Docker с нуля, сначала создайте новый файл `Dockerfile`, затем *собрать (build)* образ из него, а затем *запустить (run)* контейнер из образа.
 
 {width=100%}
-![Diagram 2: Dockerfiles, Images, Containers](images/diagram2.png)
+![Диаграмма 2: файлы Dockerfile, образы, контейнеры](images/diagram2.png)
 
-Fortunately for us, we usually don't have to build our own images from scratch. Most popular software platforms (including PHP) have images that are officially provided by the developers of the software, or by groups of interested users. You will rarely need to build a completely new image, but later we'll see how to extend an existing image by writing your own Dockerfile.
+К счастью для нас, нам обычно не нужно создавать собственные образы с нуля. Самые популярные программные платформы (включая PHP) имеют образы, которые официально предоставляются разработчиками программного обеспечения или группами заинтересованных пользователей. Вам редко нужно будет создавать совершенно новый образ, но позже мы увидим, как расширить существующий образ, написав свой собственный файл `Dockerfile`.
 
-Docker images can be built and stored on your host machine, or they can live in a remote "registry". In addition to maintaining the core Docker platform, the Docker team maintains a large registry called [Docker Hub](https://hub.docker.com/), where public images can be stored for free. Most open source software teams host official images on Docker Hub, including [PHP](https://hub.docker.com/_/php/).
+Docker-образы могут быть созданы и сохранены на вашем хост-машине, или они могут жить в удалённом «реестре». Помимо поддержки базовой платформы Docker, команда Docker поддерживает большой реестр [Docker Hub](https://hub.docker.com/), где общедоступные образы могут храниться бесплатно. Большинство команд разработчиков с открытым исходным кодом размещают официальные образы на Docker Hub, включая [PHP](https://hub.docker.com/_/php/).
 
-## Getting a PHP Docker Image
+## Получение Docker-образа PHP
 
-In order to run our hello.php script in a container, we first need to "pull" an image for PHP. Let's start with the latest stable version of PHP. In your terminal, run:
+Чтобы запустить наш скрипт `hello.php` в контейнере, нам сначала нужно «получить (pull)» образ PHP. Начнём с последней стабильной версии PHP. В вашем терминале запустите:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker pull php:latest
 ~~~~~~~
 
-You should see something like this in your terminal:
+Вы должны увидеть что-то подобное в своём терминале:
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -46,53 +46,54 @@ b808e084c9be: Downloading  7.222MB/9.858MB
 1d362d99e847: Waiting
 ~~~~~~~
 
-This indicates that Docker is pulling the version of the PHP image tagged latest. When it's done, Docker will indicate that it has pulled the latest version by showing you a status like this:
+Это указывает на то, что Docker получает последнюю версию PHP-образа. Когда это будет сделано, Docker сообщит, что он получил последнюю версию, показывая вам такой статус:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 Status: Downloaded newer image for php:latest
 ~~~~~~~
 
-Note: The "latest" tag is a standard convention that most Docker images use for the most up-to-date version of their software. Beware using “latest” indiscriminately as it will automatically track the “latest” version even when there is a major version change.
+I> Примечание
+I> Тег "latest" — стандартное соглашение, которое большинство Docker-образов используют для самой последней версии своего программного обеспечения. Остерегайтесь использовать "latest" беспорядочно, поскольку он автоматически отслеживает «последнюю» версию, даже если происходит изменение основной (major) версии.
 
-Since our hello.php script is simple, it doesn't matter which version of PHP we use, but what if we need to run an older version of PHP for an existing project? This is where Docker truly shines as we just need to specify the PHP version when we run docker pull. For example, to download the PHP 5.6 image, we just run:
+Поскольку наш скрипт `hello.php` прост, не имеет значения, какую версию PHP мы используем, но что, если нам нужно запустить более старую версию PHP для существующего проекта? Именно здесь Docker действительно блистает, поскольку нам просто нужно указать версию PHP при выполнении команды `docker pull`. Например, чтобы загрузить образ с PHP 5.6, мы просто выполняем в консоли:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker pull php:5.6
 ~~~~~~~
 
-We can use this method to get newer, and unreleased versions of PHP as well (assuming there's a at least a Beta version on the [PHP registry's list](https://hub.docker.com/_/php/)). This makes running PHP in Docker very helpful for developers who need to work with multiple versions of PHP on a regular basis.
+Мы можем использовать этот метод для получения более новых и невыпущенных версий PHP (при условии, что в списке [список реестров PHP](https://hub.docker.com/_/php/) есть по крайней мере бета-версия). Это делает выполнение PHP в Docker очень полезным для разработчиков, которым необходимо постоянно работать с несколькими версиями PHP.
 
-## Getting Code Into a Container
+## Получение кода в контейнер
 
-In order to understand the next step, you have to know a little bit about how Docker accesses files on the host system. A running container can't just reach down and read or write files to your computer - that container is essentially its own isolated system. Instead, we have to run containers with data from the host system mounted in a [volume](https://docs.docker.com/engine/admin/volumes/volumes/) or add code while building the image.
+Чтобы понять следующий шаг, вам нужно немного узнать о том, как Docker обращается к файлам на хост-машине. Выполняющийся контейнер не может просто спуститься и прочитать или записать файлы на ваш компьютер, поскольку этот контейнер фактически является собственной изолированной системой. Вместо этого мы должны запускать контейнеры с данными из хост-системы, примонтированные в [том (volume)](https://docs.docker.com/engine/admin/volumes/volumes/) или добавлять код при создании образа.
 
-Later in this book we'll cover building Docker images from Dockerfiles and adding code that way, but for this simple Hello World! example, we're just going to mount the hello.php file into our PHP container using a volume.
+Позже в этой книге мы рассмотрим создание Docker-образов из файлов `Dockerfile` и добавление кода таким образом, но для этого простого примера «Привет, мир!», мы просто примонтируем файл `hello.php` в наш контейнер PHP с использованием тома.
 
-## Running our Hello World script in Docker
+## Запуск нашего скрипта «Привет, мир!» в Docker
 
-Now that we've pulled a couple PHP images from Docker Hub and we know a little about how Docker uses volumes, we can run our script in a container from the terminal:
+Теперь, когда мы получили пару образов PHP из Docker Hub, и мы знаем немного о том, как Docker использует тома, мы можем запустить наш скрипт в контейнере в терминале:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run --rm -v $(pwd):/app php:latest php /app/hello.php
 ~~~~~~~
 
-If everything was done correctly, you should see Hello World! in your command line. You just ran your first PHP script in Docker!
+Если все было сделано правильно, вы должны увидеть `Hello World!` в командной строке. Вы только что запустили свой первый PHP-скрипт в Docker!
 
-### What's going on here?
+### Что здесь происходит?
 
-Let's go over that Docker command and what it all meant:
+Давайте обсудить эту Docker-команду и что она значит:
 
-* `docker run` - This is Docker's command to [run a command within a new container](https://docs.docker.com/engine/reference/run/). There are a lot of options that you can pass in, but we'll just start with the basics.
+* `docker run` — Это команда Docker для [запуска команды в новом контейнере](https://docs.docker.com/engine/reference/run/). Есть много опций, которые вы можете передать, но мы только начинаем с основ.
 
-* `--rm` - This tells Docker to "remove" the container after the command is run. Alternatively, you can save the container to run it again, but if you don't eventually remove the container, it will just sit around taking up space, so it's best to set the remove flag in most cases.
+* `--rm` — Это указывает Docker «удалить» контейнер после запуска команды. В качестве альтернативы вы можете сохранить контейнер, чтобы запустить его снова, но если вы в конце концов не удалите контейнер, он просто будет находится в простое, занимая место, поэтому лучше всего установить флаг удаления в большинстве случаев.
 
-* `-v $(pwd):/app` - This is telling Docker to [mount a volume](https://docs.docker.com/engine/tutorials/dockervolumes/). You typically pass in a path to a folder on your host system, a colon, and then a path to the folder in the container. Volumes are a powerful tool, but for this simple example we're just mounting the current directory (using $(pwd)) from our terminal into the /app directory in the new Docker container.
+* `-v $(pwd):/app` — Это указывает Docker о [монтировании тома](https://docs.docker.com/engine/tutorials/dockervolumes/). Обычно вы передаёте путь к каталогу на вашей хост-машине, двоеточие, а затем путь к папке в контейнере. Объёмы — это мощный инструмент, но для этого простого примера мы просто монтируем текущий каталог (используя `$(pwd)`) из нашего терминала в каталог `/app` в новом контейнере Docker.
 
-* `php:latest` - This indicates the image we're using for this container. You could specify another PHP image (eg: php:7.0 or php:5.6) to use a specific version of the language.
+* `php:latest` — Это указывает на образ, который мы используем для этого контейнера. Вы можете указать другой образ PHP (например: `php:7.0` или `php:5.6`) для использования определённой версии языка.
 
-* `php /app/hello.php` - Finally, this is the command that Docker will run in the container. Since we mounted our code in the /app directory on the container, we have to run our script from that directory.
+* `php /app/hello.php` — Наконец, это команда, которую Docker будет запускать в контейнере. Поскольку мы примонтировали наш код в каталог `/app` на контейнере, нам нужно запустить наш скрипт из этого каталога.
 
-Now that you have a basic understanding of Docker and can run a PHP script within containers, it's time to build something a little more useful and interesting. This might also be a good time to take a break and read up on some of the core Docker concepts [in their documentation](https://docs.docker.com/). When you're ready, read on to start building a PHP web application in Docker.
+Теперь, когда у вас есть базовое представление о Docker и вы можете запустить PHP-скрипт внутри контейнеров, пришло время создать что-то более полезное и интересное. Это также может быть подходящим временем, чтобы сделать перерыв и прочитать некоторые основные концепции Docker [в документации по нему](https://docs.docker.com/). Когда вы будете готовы, продолжайте чтение дальше для создания веб-приложение на PHP в Docker.
