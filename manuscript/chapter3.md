@@ -1,45 +1,45 @@
-# Chapter 3. Creating a SlimPHP Application
+# Глава 3. Создание приложение с использованием SlimPHP
 
-In the rest of this book, we'll focus on our web application: a weather checker. We'll use the [MetaWeather API](https://www.metaweather.com/api/) to search for a location and get the weather there. When we find results, we'll save them to the database so that future requests will get the cached version of the results.
+В остальной части этой книги мы сосредоточимся на нашем веб-приложении: проверке погоды. Мы будем использовать [API MetaWeather](https://www.metaweather.com/api/), чтобы найти местоположение и получить там прогноз погоду. Когда мы найдем результаты, мы сохраним их в базе данных, чтобы будущие запросы получали кешированную версию результатов.
 
-> I chose the MetaWeather API because it is free and does not require an API key. There are other weather APIs you can use for free, but most require you to sign up and get a key.
+> Я выбрал API MetaWeather, потому что он бесплатный и не требует API-ключа. Существуют и другие API сервисов погоды, которые вы можете использовать бесплатно, но большинство из них требует, чтобы вы зарегистрировались и получили ключ.
 
-Our application will provide a very simple REST API that we'll use to interact with the service. We'll create two endpoints:
+Наше приложение предоставит очень простой API REST, который мы будем использовать для взаимодействия с сервисом. Мы создадим две конечные точки:
 
-* `GET /locations/:location_id` - Gets the weather from the database (if it exists) or MetaWeather if a cached version does not.
+* `GET /locations/:location_id` — получает прогноз погоды из базы данных (если он есть) или делает запрос к MetaWeather, если нет кешированной версии.
 
-* `DELETE /locations/:location_id` - Deletes the cached version of the MetaWeather results from the database. The next call to GET weather for this location will come from the MetaWeather API.
+* `DELETE /locations/:location_id` — удаляет кешированную версию результатов MetaWeather из базы данных. Следующий вызов `GET` для получения погоды по этому местоположению будет из API MetaWeather.
 
-Before we get to the application logic, let's start simple and get a fresh installation of [SlimPHP](https://www.slimframework.com/) installed and running using Docker.
+Прежде чем мы перейдем к логике приложения, давайте начнем с простого и установим [SlimPHP](https://www.slimframework.com/) и запустим его с помощью Docker.
 
-## Installing Slim Framework
+## Установка фреймворка Slim
 
-Slim is a minimal PHP web development framework. Unlike more comprehensive frameworks like [Laravel](https://laravel.com/) or [CakePHP](https://cakephp.org/), [Slim](https://www.slimframework.com/) does not include much more than a router, middleware stack, and dependency injector. If you're familiar with [Node's Express framework](https://expressjs.com/), Slim will feel familiar to you, but even if you're not, it's such a small framework that it's pretty easy to grasp. That's why I've chosen it for this book: I don't want the framework to throw you off, but I didn't want to build everything from scratch either as the focus here is on Docker, not our PHP application.
+Slim — это очень маленький фреймворк для веб-разработки на PHP. В отличие от более сложных фреймворков, таких как [Laravel](https://laravel.com/) или [CakePHP](https://cakephp.org/), [Slim](https://www.slimframework.com/) включает не более, чем маршрутизатор, стек мидлваров и инжекторы зависимостей. Если вы знакомы с [фреймворком Node Express](https://expressjs.com/), Slim будет вам знаком, но даже если не знаете его, это такой небольшой фреймворк, который довольно легко понять. Вот почему я выбрал его для этой книги: я не хочу, чтобы фреймворк вас отвлекал, но вместе с этим я не хотел писать всё с нуля, так как основное внимание здесь уделяется Docker, а не нашему PHP-приложению.
 
-Setting up Slim with Docker actually takes fewer commands than doing it with a locally installed version of PHP. We will use [Composer](https://getcomposer.org/), but thanks to Docker we don't even need to install it on our host machine.
+Настройка Slim с Docker на самом деле требует меньше команд, чем при использовании локально установленной версии PHP. Мы будем использовать [Composer](https://getcomposer.org/), но благодаря Docker нам даже не нужно устанавливать его на нашей хост-машине.
 
-From your command line, create a new directory for your Dockerized PHP application:
+Из командной строки создайте новый каталог для вашего PHP-приложения с интеграцией Docker:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ mkdir weather-app
 ~~~~~~~
 
-And navigate to it:
+И перейдите в него:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ cd weather-app
 ~~~~~~~
 
-Now install Slim using [the official Composer Docker image](https://hub.docker.com/_/composer/):
+Теперь установите Slim, используя [официальный Docker-образ Composer](https://hub.docker.com/_/composer/):
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run --rm -v $(pwd):/app composer:latest require slim/slim "^3.0"
 ~~~~~~~
 
-If you view the `weather-app/` directory, you'll see two files (`composer.json` and `composer.lock`) and one directory (`vendor/`):
+Если вы посмотрите на каталог `weather-app/`, то увидите два файла (`composer.json` и `composer.lock`) и один каталог (`vendor/`):
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -47,19 +47,19 @@ $ ls
 composer.json   composer.lock   vendor
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-Our docker run command was similar to the one we ran in Chapter 2, but we used a different image. Instead of the PHP image we used to run the hello.php script, we used a Composer image. Let's take a look at what changed.
+Наша команда `docker run` похожа на ту, которую мы использовали во второй главе, но мы использовали другой образ. Вместо образа PHP, который мы использовали для запуска скрипта hello.php, сейчас используем образ Composer. Давайте посмотрим, что изменилось.
 
-* `composer:latest` - This indicates the image we're using for this container. You can specify a specific version of Composer if you need to; just check the list of image tags supported on [Docker Hub](https://hub.docker.com/_/composer/).
+* `composer:latest` — указывает образ, который мы используем для этого контейнера. Вы можете указать конкретную версию Composer, если вам нужно; просто проверьте список тегов образа, поддерживаемых в [Docker Hub](https://hub.docker.com/_/composer/).
 
-* `require slim/slim "^3.0"` - This is the command that actually installs Slim PHP into the container's working directory. Because that working directory is a volume from our host directory, the files composer installs are now present on your host machine as well as in the container.
+* `require slim/slim "^3.0"` — это команда, которая на самом деле устанавливает Slim PHP в рабочий каталог контейнера. Поскольку этот рабочий каталог является томом из нашего каталога хоста, файлы установки Composer теперь присутствуют как на хост-машине, так и в контейнере.
 
-At this point, your application doesn't actually do anything, but Slim has been installed and we now have some idea how composer works with PHP in Docker.
+На данный момент ваше приложение фактически ничего не делает, но Slim был установлен, и теперь у нас есть представление о том, как работает Composer с PHP в Docker.
 
-## Stubbing Out Endpoints
+## Определение конечных точек
 
-In order to give our application life, we need to have a couple endpoints. As mentioned above, Slim is little more than a router, but that actually takes care of most of our application. Let's start out by creating an index.php file with a couple stubbed out endpoints that we can build upon throughout the rest of this tutorial.
+Для того, чтобы вдохнуть жизнь нашему приложения, нам нужна пара конечных точек. Как упоминалось выше, Slim — это чуть больше, чем маршрутизатор, но на самом деле он заботится о большей части нашего приложения. Начнем с создания файла `index.php` с помощью пары определенных конечных точек, которые мы можем использовать на протяжении всего этого руководства.
 
 {title="index.php", linenos=off, lang=php}
 ~~~~~~~
@@ -67,126 +67,126 @@ In order to give our application life, we need to have a couple endpoints. As me
 
 require 'vendor/autoload.php';
 
-// Instantiate the App object
+// Создать объект App
 $app = new \Slim\App();
 
-// Declare routes
+// Определение маршрутов
 $app->get('/locations/{id}', function ($request, $response, $args) {
-    return $response->withStatus(200)->write("Location {$args['id']} retrieved.");
+    return $response->withStatus(200)->write("Получено местоположение {$args['id']}.");
 });
 
 $app->delete('/locations/{id}', function ($request, $response, $args) {
-    return $response->withStatus(200)->write("Location {$args['id']} deleted.");
+    return $response->withStatus(200)->write("Удалено местоположение {$args['id']}.");
 });
 
-// Run the application
+// Запуск приложения
 $app->run();
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-This single file creates two API endpoints that simply return text for now. In case you're not familiar with Composer or Slim's routing system, here's what's going on:
+Этот единственный файл создает две конечные точки API, которые просто возвращают текст. Если вы не знакомы с системой маршрутизации Composer или Slim, вот что происходит:
 
-* `require 'vendor/autoload.php';` - Any PHP project that uses Composer must include Composer's autoload.php file somewhere. Since our new application is just one file, we've added it as the first thing.
+* `require 'vendor/autoload.php';` — любой PHP-проект, который использует Composer, должен содержать файл Composer `autoload.php`. Поскольку наше новое приложение — всего лишь один файл, мы добавили это в первую очередь.
 
-* `$app = new \Slim\App();` - This creates a new Slim PHP application instance. Slim can handle middleware and help with dependency injection as well, but for now we're just using its routing methods.
+* `$app = new \Slim\App();` — создает новый экземпляр приложения Slim PHP. Slim может обрабатывать мидлвары и помогать также с инъекцией зависимостей, но пока мы просто используем его методы маршрутизации.
 
-* `$app->get('/locations/{id}', function ($request, $response, $args) {...});` - This first endpoint handles GET requests to an endpoint that follows the pattern /locations/{id} where id will be a unique indicator for a location. We'll go into more detail about this endpoint and the callback function later in the tutorial.
+* `$app->get('/locations/{id}', function ($request, $response, $args) {...});` — это первая конечная точка обрабатывает GET-запросы к конечной точке, которой соответствует регулярному шаблону /locations/{id}, где id будет уникальный идентификатор местоположения. Мы подробно рассмотрим эту конечную точку и колбэк позже в руководстве.
 
-* `$app->delete('/locations/{id}', function ($request, $response, $args) {...});` - This second endpoint handles DELETE requests to an endpoint that follows the pattern /locations/{id}. This will be for deleting the weather details for a specific location stored in our database.
+* `$app->delete('/locations/{id}', function ($request, $response, $args) {...});` — эта вторая конечная точка обрабатывает DELETE-запросы конечной точке, которая соответствует регулярному шаблону /locations/{id}. Это позволит удалить данные о погоде в определенном местоположении, которое хранится в базе данных.
 
-* `$app->run();` - Finally, this line runs the Slim application, enabling any endpoints defined above. This is usually the last line in any Slim project.
+* `$app->run();` — наконец, эта строка запускает приложение Slim, позволяя использовать любые конечные точки, указанные выше. Обычно это последняя строка в любом проекте Slim.
 
-## Running Our Application for the First Time
+## Запуск нашего приложения в первый раз
 
-Now we can run our application in a Docker container just to try it out. There will be two endpoints that won't really do anything, but at least it will let us verify that we're on track before we continue expanding the application. From the terminal, run:
+Теперь мы можем запустить наше приложение в контейнере Docker, чтобы попробовать его. Будет две конечных точек, которые на самом деле ничего не делают, но по крайней мере это позволит нам проверить, что мы находимся на верном пути, прежде чем мы продолжим расширять приложение. В терминале выполните:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run --rm -p 38000:80 -v $(pwd):/var/www/html php:apache
 ~~~~~~~
 
-Now if you navigate to http://localhost:38000/index.php/locations/1 in your web browser, you should see an empty page with the following text:
+Теперь, если вы перейдете по URL-адресу http://localhost:38000/index.php/locations/1 в своем браузере, то увидите пустую страницу со следующим текстом:
 
-`Location 1 retrieved.`
+`Получено местоположение 1.`
 
-You've just successfully run your first PHP web application in Docker!
+Вы только что успешно запустили свое первое веб-приложение на PHP в Docker!
 
-### What's going on here?
+### Что здесь происходит?
 
-The `docker run` command we used this time was different from the two we used to run our hello.php script and our `composer require...` command. The reason is that this time we wanted to get the latest version of PHP with [Apache](https://httpd.apache.org/) included so we could serve our web application. Let's take a look at the new parts of the command in more detail:
+Команда `docker run`, которую мы использовали в этот раз, отличалась от той, которую мы использовали для запуска нашего скрипта hello.php и нашей команды `composer require ...`. Это объясняется тем, что на этот раз мы хотели получить последнюю версию PHP с [Apache](https://httpd.apache.org/), с тем чтобы мы могли обслуживать наше веб-приложение. Давайте рассмотрим новые части команды более подробно:
 
-* `-p 38000:80` - Here we are defining [port mapping](https://docs.docker.com/engine/reference/commandline/port/) between our container and host system. This command says that Docker should map port 80 on the container to port 38000 on our host machine. You can pick any valid port on your host, but it's probably a good idea to use a high one (10000+) because many of the lower ones are reserved for built-in processes on most standard machines. For the container, you *must* use port 80 because that's the port the Docker image exposes and Apache runs on.
+* `-p 38000:80` — здесь мы определяем [сопоставление портов](https://docs.docker.com/engine/reference/commandline/port/) между нашей контейнером и хост-системой. Эта команда говорит, что Docker должен сопоставить порт 80 на контейнере с портом 38000 на нашей хост-машине. Вы можете выбрать любой допустимый порт на вашем хосте, но возможно лучше будет использовать высокий (10000+) порт, потому что многие из более нижних зарезервированы для встроенных процессов на большинстве стандартных машин. Для контейнера вы *должны* использовать порт 80, потому что это порт, который предоставляет образ Docker, и на котором работает Apache.
 
-* `-v $(pwd):/var/www/html` - This time, we're mounting the code from our host machine to the container's `/var/www/html` directory. The reason is that the PHP Apache image serves code from this directory. This is a subtle but critical difference between the PHP scripts we ran before. Make sure to carefully read the [official PHP Docker image documentation](https://hub.docker.com/_/php/) to avoid missing things like this.
+* `-v $(pwd):/var/www/html` — на этот раз мы монтируем код с нашего хост-компьютера в каталог `/var/www/html` контейнера. Причина в том, что образ PHP Apache выполняет код из этого каталога. Это тонкая, но критическая разница между скриптами PHP, которые мы запускали раньше. Обязательно внимательно прочитайте [официальную документацию по документу PHP Docker](https://hub.docker.com/_/php/), чтобы избежать пропусков подобного.
 
-* `php:apache` - This image is the official PHP Apache image tag. It bundles PHP and Apache (a popular web server) into one container, allowing you to quickly serve your code for local development. While we won't cover it in this book, another option would be to use the `php:fpm` image and a linked `nginx` container.
+* `php:apache` — этот образ является официальным тегом образа PHP Apache. Он объединяет PHP и Apache (популярный веб-сервер) в один контейнер, что позволяет быстро обслуживать ваш код для локальной разработки. Хотя мы не будем рассказывать об этом в этой книге, другим вариантом будет использование образа `php:fpm` и связанного контейнера `nginx`.
 
-* Finally, you'll notice that there's no command after the image name this time. This can trip new Docker users up, but by default, most images run some command even if you don't specify one. In the case of the PHP Apache image, the default command runs [a shell script](https://github.com/docker-library/php/blob/903540ea7918b5cabed6b32e81f8518f9e6f204f/7.1/apache/apache2-foreground) that starts Apache. This script is exactly what we want, so there's no reason to change it.
+* Наконец, вы можете заметить, что на этот раз  после имени образа нет команды. Это может сбить с толку новых пользователей Docker, но по умолчанию большинство образов выполняют некоторую команду, даже если вы ее не укажете. В случае образа PHP Apache команда по умолчанию запускает [скрипт оболочки] (https://github.com/docker-library/php/blob/903540ea7918b5cabed6b32e81f8518f9e6f204f/7.1/apache/apache2-foreground), который запускает Apache. Этот скрипт именно то, что мы хотим, поэтому нет причин его менять.
 
-At this point, your terminal will show any Apache requests that come in, so when you loaded the first URL, you probably saw something like:
+На этом этапе ваш терминал покажет все входящие в Apache запросы, поэтому, когда вы загрузили первый URL-адрес, вы, вероятно, заметили что-то вроде:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 172.17.0.1 - - [21/Aug/2017:18:35:33 +0000] "GET /index.php/locations/1 HTTP/1.1" 200 250 "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"
 ~~~~~~~
 
-You can stop and exit the terminal by sending a "break" signal to the terminal. On Macs, this is done by holding `control` and pressing `c`.
+Вы можете остановить и выйти из терминала, посылая сигнал "break" в терминал. На Mac это делается, удерживая `control` с нажатой `c`.
 
-## More Docker Run Options
+## Дополнительные параметры запуска Docker
 
-### Running in detached mode
+### Работа в отдельном режиме
 
-Another option for running your new web application is to run the container in "[detached mode](https://docs.docker.com/engine/reference/run/#detached-vs-foreground)." This means you will not see terminal output from your container. This is done by adding the `-d` flag to our previous command:
+Другой вариант запуска вашего нового веб-приложения — запустить контейнер в «[отдельном режиме](https://docs.docker.com/engine/reference/run/#detached-vs-foreground)». Это означает, что вы не увидите вывод терминала из вашего контейнера. Это делается добавлением флага `-d` к нашей предыдущей команде:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run -d --rm -p 38000:80 -v $(pwd):/var/www/html php:apache
 ~~~~~~~
 
-### Stopping a container
+### Остановка контейнера
 
-Immediately after starting the container in detached mode, your terminal will show the full ID of the new container - something like `a403bf1018222a42ba...` If you want to stop this container, you can tell Docker using the `docker stop` command with the container's ID. For example:
+Сразу же после запуска контейнера в отдельном режиме ваш терминал отобразит полный идентификатор нового контейнера — что-то вроде `a403bf1018222a42ba ...` Если вы хотите остановить этот контейнер, вы можете указать Docker, используя команду `docker stop` с идентификатором контейнера. Например:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker stop a403bf1018222a42ba
 ~~~~~~~
 
-Because typing that whole ID is cumbersome, Docker allows you to just type the first three or more characters if you prefer:
+Поскольку ввод с клавиатуры полного идентификатора обременительно, Docker позволяет вам просто набирать первые три или более символов, сколько вы предпочитаете:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker stop a40
 ~~~~~~~
 
-### Naming containers
+### Именование контейнеров
 
-Finally, I recommend [naming your containers](https://docs.docker.com/engine/reference/run/#container-identification). We will do this for many later examples in this book as it is much easier to remember a container by name than by the randomly assigned IDs, plus IDs are random, so each time you run a new version of the container, it gets a new ID. Names can be given out many times as long as there's not already a container with the same name. To name our new application container we could re-create it with the `--name` flag passed in:
+Наконец, я рекомендую [давать названия вашим контейнерам](https://docs.docker.com/engine/reference/run/#container-identification). Мы сделаем это для многих последующих примеров в этой книге, так как гораздо легче запомнить контейнер по имени, чем случайно назначенный идентификатор, кроме этого, идентификаторы случайны, поэтому каждый раз, когда вы запускаете новую версию контейнера, он получает новый идентификатор. Имена могут выдаваться много раз, пока еще нет контейнера с тем же именем. Чтобы назвать наш новый контейнер приложения, мы могли бы его пересоздать с флагом `--name`, переданным в  него:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run -d --rm --name=weather-app -p 38000:80 -v $(pwd):/var/www/html php:apache
 ~~~~~~~
 
-There are many more options available when using the [docker run](https://docs.docker.com/engine/reference/run/) command, so you may want to read over the documentation in more detail. We will cover some of these options as we develop the rest of our application.
+Есть много других опций, доступных при использовании команды [docker run](https://docs.docker.com/engine/reference/run/), поэтому вы можете прочитать документацию более подробно. Мы рассмотрим некоторые из этих опций в процессе разработки остальной части нашего приложения.
 
-## Connecting to the MetaWeather API
+## Подключение к API MetaWeather
 
-The next step in building our API is to retrieve data from the [MetaWeather API](https://www.metaweather.com/api/). This is mostly a PHP problem, and running in Docker shouldn't really matter but let's start off by making sure all our existing containers are stopped:
+Следующим шагом в создании нашего API является извлечение данных из [API MetaWeather] (https://www.metaweather.com/api/). Это в основном проблема PHP, и выполнение в Docker не имеет большого значения, но давайте начнем с того, что все существующие контейнеры остановлены:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker ps
 ~~~~~~~
 
-This command will [list all running containers](https://docs.docker.com/engine/reference/commandline/ps/). You can also see stopped containers by adding the `-a` flag.
+Эта команда [перечислит спиоск всех запущенных контейнеров](https://docs.docker.com/engine/reference/commandline/ps/). Вы также можете увидеть остановленные контейнеры, добавив флаг `-a`.
 
-If any containers are running, then use `docker stop <ID>` to stop them before we continue on.
+Если какие-либо контейнеры запущены, используйте `docker stop <ID>`, чтобы остановить их, прежде чем продолжить.
 
-### Adding Guzzle
+### Добавление Guzzle
 
-While you can get data from MetaWeather's API using [PHP's built in cURL adapter](http://php.net/manual/en/book.curl.php), I prefer [Guzzle](http://docs.guzzlephp.org/en/stable/) as it takes less work to make API calls. Plus, this will give us an opportunity to install a new package using Composer. Open up the composer.json file that was automatically created when we set up Slim, and add a line to the require block for Guzzle:
+Хотя вы можете получать данные из API MetaWeather с помощью [встроенного в PHP адаптера cURL](http://php.net/manual/ru/book.curl.php), я предпочитаю [Guzzle](http://docs.guzzlephp.org/en/stable/), поскольку при его использовании для выполнения вызовов к API требуется меньше работы. Кроме того, это даст нам возможность установить новый пакет с помощью Composer. Откройте файл `composer.json`, который был автоматически создан, когда мы устанавливали Slim, и добавьте строку для Guzzle в блок `require`:
 
 {linenos=off, lang=json}
 ~~~~~~~
@@ -198,14 +198,14 @@ While you can get data from MetaWeather's API using [PHP's built in cURL adapter
 }
 ~~~~~~~
 
-Now in your terminal, run:
+Теперь в вашем терминале выполните:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run --rm -v $(pwd):/app composer:latest update
 ~~~~~~~
 
-The container will install the new packages and update your composer.lock file. During this process, you should see some output like this in the terminal:
+Контейнер установит новые пакеты и обновит ваш файл `composer.lock`. Во время этого процесса в терминале вы увидите подобный вывод:
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -220,11 +220,11 @@ Writing lock file
 Generating autoload files
 ~~~~~~~
 
-Now Guzzle is installed, and ready to be used.
+Теперь Guzzle установлен и готов к использованию.
 
-### Calling the MetaWeather API
+### Вызов API MetaWeather
 
-The endpoint we'll be using takes a `woeid` ("[Where On Earth ID](https://developer.yahoo.com/geo/geoplanet/guide/concepts.html)") and returns the weather forecast in [JSON](https://www.json.org/) format. Initially, our application will just pass requests through to MetaWeather and return the same JSON data that they do. We'll add database caching in the next chapter. Here's our updated `index.php` file:
+Конечная точка, которую мы будем использовать, берет `woeid` ([«Where On Earth ID» (ID местоположения)](https://developer.yahoo.com/geo/geoplanet/guide/concepts.html)) и возвращает прогноз погоды в формате [JSON](https://www.json.org/). Первоначально наше приложение будет просто передавать запросы через MetaWeather и возвращать те же данные JSON, в котором они возвращаются. В следующей главе мы добавим кеширование базы данных. Вот наш обновленный файл `index.php`:
 
 {title="index.php", linenos=off, lang=php}
 ~~~~~~~
@@ -232,58 +232,59 @@ The endpoint we'll be using takes a `woeid` ("[Where On Earth ID](https://develo
 
 require 'vendor/autoload.php';
 
-// Create a new Container with Guzzle injected
+// Создать новый контейнер с внедренным Guzzle
 $container = new \Slim\Container([
     'http' => function () {
         return new GuzzleHttp\Client();
     }
 ]);
 
-// Instantiate the App object
+// Создать объект App
 $app = new \Slim\App($container);
 
-// Get weather by location ID
+// Получить погоду по идентификатору местоположения
 $app->get('/locations/{id}', function ($request, $response, $args) {
 
-    // Get the weather from MetaWeather
+    // Получить погоду из MetaWeather
     $result = $this->http->get("https://www.metaweather.com/api/location/{$args['id']}")
         ->getBody()
         ->getContents();
 
-    // Return the results as JSON
+    // Вернуть результаты в виде JSON
     return $response->withStatus(200)->withJson(json_decode($result));
 });
-// The delete endpoint is unchanged
+
+// Конечная точка delete не изменилась
 $app->delete('/locations/{id}', function ($request, $response, $args) {
-    return $response->withStatus(200)->write("Location {$args['id']} deleted.");
+    return $response->withStatus(200)->write("Удалена локация {$args['id']}.");
 });
 
-// Run the application
+// Запуск приложения
 $app->run();
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-We've made some updates - mostly to the get('/locations/{id}', ...) endpoint. Let's take a look at what's new here:
+Мы сделали некоторые обновления — в основном, для конечной точки `get('/locations/{id}', ...)`. Давайте посмотрим, что здесь нового:
 
-* `$container = new \Slim\Container([...]);` - If you're not familiar with Slim's Dependency Injection system, you can [read up on it here](https://www.slimframework.com/docs/concepts/di.html). Since this book isn't focused on dependency injection, I'll just say that this injects Guzzle into the application so we can use it in any of our routes by calling $this->http. It makes our code more concise, and allows us to mock the library if we add tests to the application later.
+* `$container = new \Slim\Container([...]);` — если вы не знакомы с системой внедрения зависимости Slim, вы можете [прочитать про это здесь](https://www.slimframework.com/docs/concepts/di.html). Поскольку эта книга не касается инъекции зависимостей, я просто скажу, что это вводит Guzzle в приложение, поэтому мы можем использовать эту библиотеку на любом из наших маршрутов, вызывая `$this->http`. Это делает наш код более кратким и позволяет нам имитировать библиотеку, когда позже мы добавим тесты в приложение.
 
-* `$result = $this->http->get("https://www.metaweather.com/api/location/{$args['id']}")...` - This is where we make the call to MetaWeather through Guzzle. As you can see, we're simply passing the locationId from our Slim route into the API endpoint provided by MetaWeather. We also call getBody() and getContents() since we just want to get the response as a string rather than a [stream](http://docs.guzzlephp.org/en/stable/psr7.html#streams).
+* `$result = $this->http->get("https://www.metaweather.com/api/location/{$args['id']}")...` — здесь мы делаем вызов к MetaWeather через Guzzle. Как вы можете видеть, мы просто передаем `locationId` с нашего маршрута Slim-приложения в конечную точку API, предоставленную MetaWeather. Мы также вызываем `getBody()` и `getContents()`, так как просто хотим получить ответ в виде строки, а не [потока] (http://docs.guzzlephp.org/en/stable/psr7.html#streams).
 
-* `return $response->withStatus(200)->withJson(json_decode($result));` - Finally, we respond with a 200 response code and withJson(...). Slim provides this method to automatically set JSON response headers, but because the response from MetaWeather came back as a JSON string, we have to run json_decode on it before re-encoding it into JSON.
+* `return $response->withStatus(200)->withJson(json_decode($result));` — наконец, мы отвечаем кодом ответа 200 и `withJson(...)`. Slim предоставляет этот метод для автоматической установки JSON-ответа, но поскольку ответ от MetaWeather вернулся в виде строки формата JSON, мы должны выполнить `json_decode` на нем, прежде чем перекодировать его в JSON.
 
-### Testing it out
+### Тестирование
 
-Our application is ready to pass a real location ID to MetaWeather's API and return some data. First, find a location ID using [this WOEID lookup tool](http://woeid.rosselliot.co.nz/). I'm using my home town of Chicago's ID for testing: `2379574`.
+Наше приложение готово передать реальный идентификатор местоположения в API MetaWeather и вернуть некоторые данные. Сначала найдите идентификатор местоположения, используя [этот инструмент поиска WOEID](http://woeid.rosselliot.co.nz/). Я использую идентификатор своего родного города Чикаго для тестирования: `2379574`.
 
-Now, let's run the Docker container again:
+Теперь давайте снова запустим контейнер Docker:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run -d --rm --name=weather-app -p 38000:80 -v $(pwd):/var/www/html php:apache
 ~~~~~~~
 
-And visit the running application in your browser at <http://localhost:38000/index.php/locations/2379574>. You should receive a response in JSON that looks something like this:
+И теперь посетите запущенное приложение в своем браузере по URL-адресу <http://localhost:38000/index.php/locations/2379574>. Вы должны получить ответ в JSON, который выглядит примерно так:
 
 {linenos=off, lang=json}
 ~~~~~~~
@@ -335,6 +336,6 @@ And visit the running application in your browser at <http://localhost:38000/ind
 }
 ~~~~~~~
 
-Your Dockerized PHP application is now returning real data from an external data source and being served in Apache, but you'll probably notice that it's not exactly the speediest application in the world (mine clocked in at 2.9 seconds page load time!).
+Ваше приложение на PHP с интегрированным Docker теперь возвращает реальные данные из внешнего источника данных и будет обслуживаться сервером Apache, но вы, вероятно, заметите, что это не совсем самое быстрое приложение в мире (у меня было время загрузки страницы в 2,9 секунды!).
 
-MetaWeather is a free service, and not intended to be blazingly fast around the world. In order to fix that, we're going to save responses from MetaWeather in our own MySQL database and serve those saved responses up when we can. This will greatly improve performance, but will also show us how to add a database to a PHP application with Docker.
+MetaWeather — это бесплатный сервис, который не ставит своей целью быть очень быстрым по всему миру. Чтобы исправить это, мы собираемся сохранять ответы от MetaWeather в нашей собственной базе данных MySQL и выдавать эти сохраненные ответы вместо того, чтобы делать новые запросы к API. Это значительно улучшит производительность, но также покажет нам, как добавить базу данных в приложение на PHP с помощью Docker.
