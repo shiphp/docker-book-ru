@@ -1,12 +1,12 @@
-# Chapter 4. Connecting to the Database
+# Глава 4. Подключение к базе данных
 
-Before we can connect a database, we need to make sure that our PHP container has all the necessary extensions installed. By default, the PHP Docker image from Docker Hub is pretty lightweight, so it doesn't include many PHP extensions or Linux packages you might need. This tradeoff between smaller and more flexible images is one you'll have to make based on your project priorities, but since we know we'll need MySQL for this project, let's extend the base PHP image with the required extensions.
+Прежде чем мы сможем подключиться к базе данных, нам следует убедиться, что в нашем PHP-контейнере установлены все необходимые расширения. По умолчанию Docker-образ PHP из Docker Hub довольно легкий, поэтому он не включает много расширений PHP или пакетов Linux, которые могут вам понадобиться. Этот компромисс между маленькими по размеру и более гибкими образами - это то, что вам нужно выбирать на основе приоритетов вашего проекта, но поскольку мы знаем, что нам понадобится MySQL, давайте расширим базовый образ PHP необходимыми расширениями.
 
-> The base PHP images are usually a good starting point, but I've also started keeping some PHP images with more common extensions enabled in Github. Check out [this repository for more](https://github.com/shiphp/dockerfiles).
+> Основные PHP-образы обычно являются хорошей отправной точкой, но я также начал держать несколько PHP-образов с более распространенными расширениями на GitHub. Посмотрите [этот репозиторий для получения подробностей](https://github.com/shiphp/dockerfiles).
 
-## Creating a Custom Dockerfile
+## Создание собственного Dockerfile
 
-In the root of your `weather-app` project, next to the `index.php` file, create a new file called simply `Dockerfile`. Dockerfiles have no extension, and are used by Docker to configure and set up images. All the images on [Docker Hub](https://hub.docker.com/) have a corresponding Dockerfile, and usually you can find them on Github. [PHP's Dockerfiles are here](https://github.com/docker-library/php), but they may be a little confusing since they build on one-another. Our Dockerfile will be much simpler:
+В корне вашего проекта `weather-app`, рядом с файлом `index.php`, создайте новый файл с названием `Dockerfile`. У файлов `Dockerfile` не имееют расширения и используются Docker для конфигурации и настройки образов. У всех образов на [Docker Hub](https://hub.docker.com/) есть файл с таким названием, и обычно вы можете найти их на GitHub. [Файлы `Dockerfile` для PHP находятся здесь](https://github.com/docker-library/php), но они могут быть немного запутанными, поскольку они строятся друг на друге. Наш `Dockerfile` будет гораздо проще:
 
 #### Dockerfile
 
@@ -17,26 +17,26 @@ FROM php:apache
 RUN docker-php-source extract && docker-php-ext-install mysqli && docker-php-source delete
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-This Dockerfile has two lines:
+Представленный выше `Dockerfile` содержат две строки:
 
-* `FROM php:apache` - This tells Docker where to start when building the image. You can start with just a Linux distribution (like [Ubuntu](https://hub.docker.com/_/ubuntu/) or the super light [Alpine](https://hub.docker.com/_/alpine/)), or you can extend a more specific container as we did in this case. Here we're extending the `php:apache` image we used to run our container before.
+* `FROM php:apache` - указывает Docker, с чего начать при создании образа. Вы можете начать с простого дистрибутива Linux (например, [Ubuntu](https://hub.docker.com/_/ubuntu/) или сверхлегкий [Alpine] (https://hub.docker.com/_/alpine /)), или вы можете расширить более конкретный контейнер, как в этом случае. Здесь мы расширяем образ `php:apache`, который мы использовали для запуска нашего контейнера раньше.
 
-* `RUN docker-php-source extract...` - This is the line that adds the PHP extensions we need. In our case, we just want to use [mysqli functions](http://php.net/manual/en/book.mysqli.php) for our database. Since this is such a common extension, the PHP image has methods for adding it automatically when we extend the base image with these lines.
+* `RUN docker-php-source extract...` - это строка добавляет расширения PHP, которые нам нужны. В нашем случае мы просто хотим использовать [функции mysqli](http://php.net/manual/ru/book.mysqli.php) для нашей базы данных. Поскольку это такое распространенное расширение, у образа PHP есть методы для его автоматического добавления, когда мы расширяем базовый образ этими строками.
 
-> Check out [the official Docker documentation](https://docs.docker.com/engine/reference/builder/) for more options for extending existing images.
+> Ознакомьтесь с [официальной документацией Docker](https://docs.docker.com/engine/reference/builder/) для получения дополнительных опций для расширения существующих образов.
 
-## Building the Image
+## Сборка образа
 
-In order to create an image, we will build it from the Dockerfile we created above:
+Мы соберём образ из файла `Dockerfile`, который мы создали выше:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker build . -t shiphp/weather-app
 ~~~~~~~
 
-When you run this command, you will see a bunch of output as Docker builds your image, ending with something like:
+Когда вы запустите эту команду, вы увидите кучу вывода, поскольку Docker создает ваш образ, заканчивая чем-то вроде:
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -45,15 +45,15 @@ Successfully built 8dc1f8c175a1
 Successfully tagged shiphp/weather-app:latest
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит
 
-The [Docker build](https://docs.docker.com/engine/reference/commandline/build/) command reads your Dockerfile and creates an image that can then be used to run a container. In this case, we're passing two parameters to the command:
+Команда [Docker build](https://docs.docker.com/engine/reference/commandline/build/) считывает файл `Dockerfile` и создает образ, который затем можно использовать для запуска контейнера. В этом случае мы передаем два параметра команде:
 
-* `.` - The dot lets Docker know the "context" of our build - in this case, it's the current directory. You can also use an absolute path like `/Users/username/weather-app` if you know the exact path of your Dockerfile. Docker automatically builds this image in the context of the directory containing your Dockerfile, so make sure your Dockerfile is located at the root of your project.
+* `.` - символ «точка» позволяет Docker знать «контекст» нашей сборки - в данном случае это текущий каталог. Вы также можете использовать абсолютный путь, например `/Users/username/weather-app`, если вам известен точный путь вашего `Dockerfile`. Docker автоматически создает этот образ в рамках каталога, содержащего файл `Dockerfile`, поэтому убедитесь, что ваш файл `Dockerfile` находится в корне вашего проекта.
 
-* `-t shiphp/weather-app` - The -t flag sets a "tag" for your image. This tag will allow you to more easily create a container from the image or push the image to a registry to share it with others.
+* `-t shiphp/weather-app` - флаг `-t` устанавливает «тег» для вашего образа. Этот тег позволит вам облегчить создание контейнера из образа или отправить образ в реестр, чтобы поделиться им с другими.
 
-You can see a list of all the Docker images on your local machine by running `$ docker images`. When you run this command, you should see something like this in your terminal:
+Вы можете просмотреть список всех Docker-образов на вашем локальном компьютере, запустив `$ docker images`. Когда вы запустите эту команду, вы должны увидеть что-то подобное в своем терминале:
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -61,47 +61,47 @@ REPOSITORY         TAG    IMAGE ID     CREATED        SIZE
 shiphp/weather-app latest 8dc1f8c175a1 27 minutes ago 391MB
 ~~~~~~~
 
-## Running a MySQL Container
+## Запуск контейнера с MySQL
 
-In the introduction, I mentioned that Docker containers could be "linked" through [Docker's network feature](https://docs.docker.com/engine/userguide/networking/). In order to have our PHP application get data from our database, we need to link it to an active database container. Let's start a new MySQL container so we can link our web application to it:
+Во введении я упомянул, что контейнеры Docker могут быть «связаны» через [возможность сети Docker](https://docs.docker.com/engine/userguide/networking/). Чтобы наше приложение PHP получало данные из нашей базы данных, нам нужно связать его с активным (работающим) контейнером базы данных. Давайте запустим новый контейнер MySQL, чтобы мы могли связать наше веб-приложение с ним:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run -d --rm --name weather-db -e MYSQL_USER=admin -e MYSQL_DATABASE=weather -e MYSQL_PASSWORD=p23l%v11p -e MYSQL_RANDOM_ROOT_PASSWORD=true mysql:5.7
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-When you run the above docker run command, Docker will get the latest version of the [MySQL 5.7 image](https://hub.docker.com/_/mysql/) and start a container named weather-db. Like PHP, MySQL has [listed their Docker images on Docker Hub](https://hub.docker.com/_/mysql/), and you can use them in much the same way. Some of the flags above are new though, so let's take a closer look:
+Когда вы запустите приведенную выше команду `docker run`, Docker получит последнюю версию [образа MySQL 5.7](https://hub.docker.com/_/mysql/) и запустит контейнер с именем weather-db. Как и PHP, MySQL имеет [перечисленные Docker-образы на Docker Hub](https://hub.docker.com/_/mysql/), и вы можете использовать их почти точно так же. Некоторые из вышеперечисленных флагов вы видите в первый раз, поэтому давайте внимательно разберём данную команду:
 
-* `-d` - This runs the container in "detached" mode, meaning that you won't have to keep your terminal connected to the container.
+* `-d` - запускает контейнер в «отсоединенном» режиме, что означает, что вам не нужно будет подключать терминал к контейнеру.
 
-* `--name weather-db` - Naming our database container is important because it's easier to connect to a named container. We can also use this name to connect to the MySQL database from within our PHP application as we'll see later.
+* `--name weather-db` - именование нашего контейнера базы данных важно, потому что позволяет вам проще подключаться к именованному контейнеру. Мы также можем использовать это имя для подключения к базе данных MySQL из нашего PHP-приложения, как мы увидим позже.
 
-* `-e MYSQL_USER=admin` - The [MySQL image](https://hub.docker.com/_/mysql/) includes several -e (environmental variable) options. This first one sets the username for the MySQL user we'll use in our PHP application. More about the environmental options is available on [the official Docker Hub image](https://hub.docker.com/_/mysql/).
+* `-e MYSQL_USER=admin` - [образ MySQL](https://hub.docker.com/_/mysql/) содержит несколько опций `-e` (для установки переменной окружения). Первая опция задает имя пользователя для пользователя MySQL, которое мы будем использовать в нашем приложении PHP. Подробнее про опции, относящийся к окружению, можно узнать на [странице официального образа на Docker Hub](https://hub.docker.com/_/mysql/).
 
-* `-e MYSQL_DATABASE=weather` - By default, the container will not create a database. While you can create one manually by logging into the container (which will be covered in the next section), it's easier to create the database up front like this.
+* `-e MYSQL_DATABASE=weather` - по умолчанию контейнер не будет создавать базу данных. Хотя вы можете создать ее вручную, войдя в контейнер (эта возможность будет рассмотрена в следующем разделе), проще создать базу данных таким образом.
 
-* `-e MYSQL_PASSWORD=p23l%v11p` - This sets our database password to something besides the default. Even though it isn't a huge security risk as we're just doing local development, you should set this to your own strong password.
+* `-e MYSQL_PASSWORD=p23l%v11p` - это устанавливает наш пароль базы данных на что-то, кроме значения по умолчанию. Несмотря на то, что это не огромный риск для безопасности, поскольку мы просто выполняем локальную разработку, вам стоит установить собственный надежный пароль.
 
-* `-e MYSQL_RANDOM_ROOT_PASSWORD=true` - Your root user password should be set to something random as you're not going to be logging in with the root user anyway.
+* `-e MYSQL_RANDOM_ROOT_PASSWORD=true` - ваш пароль пользователя root должен быть установлен на что-то случайное, так как вы все равно не будете входить в систему под пользователем root.
 
-* `mysql:5.7` As with the PHP image, you can choose a version of MySQL to use. Here I've elected to use the version 5.7.
+* `mysql:5.7` Как и с образом PHP, вы можете выбрать используемую версию MySQL. Здесь я решил использовать версию 5.7.
 
-As with the `php:apache` image, the default image command is fine, so we don't need to add anything after the image.
+Как и с образом `php:apache`, команда образа по умолчанию в порядке, поэтому нам не нужно ничего добавлять после образа.
 
-## Logging into a Running Container
+## Вход в работающий контейнер
 
-At this point, we want to check that the database in our new container is working, but how can we access a running Docker container? We will use the `docker exec` command to enter the terminal for our new container, and then once we're inside, we'll use the [MySQL command line interface](https://dev.mysql.com/doc/refman/5.7/en/mysql.html) to access the database we created.
+На этом этапе мы хотим проверить, работает ли база данных в нашем новом контейнере, но как мы можем получить доступ к работающему контейнеру Docker? Мы будем использовать команду `docker exec` для входа в терминал в нашем новом контейнере, а затем, когда мы будем внутри, мы можем использовать [интерфейс командной строки MySQL](https://dev.mysql.com/doc/refman/5.7/en/mysql.html) для доступа к базе данных, которую мы создали.
 
-We can enter a bash session on the running database container using:
+Мы можем начать сессию bash в текущем контейнере базы данных, используя следующую команду:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker exec -it weather-db bash
 ~~~~~~~
 
-You should see a line like `root@35c7ad5a574d:/#` (with your container's ID) on your terminal, indicating that you're now logged in to the running container. From within the container (not on your host machine), run:
+Вы должны увидеть строку, например `root@35c7ad5a574d:/#` (с идентификатором вашего контейнера) в вашем терминале, указывающую на то, что вы вошли в работающий контейнер. Внутри контейнера (не на хост-машине) выполните:
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -109,7 +109,7 @@ $ mysql --user=admin --password
 Enter password:
 ~~~~~~~
 
-Enter the password you chose for the MySQL container you created above (in this example it was p23l%v11p), and hit the "return" key. You'll see some information about MySQL like this:
+Введите пароль, который вы выбрали для MySQL-контейнера, созданного командной выше (в этом примере это был `p23l%v11p`), и нажмите клавишу ввода. Вы увидите определенную информацию о MySQL:
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -128,7 +128,7 @@ Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 mysql>
 ~~~~~~~
 
-Finally, let's just check that our database was created using the `show databases` command:
+Наконец, давайте просто проверим, что наша база данных была создана с помощью команды `show databases`:
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -142,41 +142,41 @@ mysql> show databases;
 2 rows in set (0.01 sec)
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-In the section above, we logged into a terminal on the running database container, we then logged into MySQL via the command line interface, and finally, we took a look at the databases available to us. Since you may not be familiar with all these commands, we'll review them one-by-one.
+В вышеприведенном разделе мы вошли в терминал работающего контейнера базы данных, затем мы вошли в MySQL через интерфейс командной строки и, наконец, посмотрели доступные нам базы данных. Поскольку вы, возможно, не знакомы со всеми этими командами, мы рассмотрим их одна за другим.
 
 #### Docker Exec
 
-* `docker exec` - This is the [Docker command for executing commands](https://docs.docker.com/engine/reference/commandline/exec/) on a running container. Like Docker's `run` command, there are many options for the `exec` command, but we'll just cover the highlights for this example.
+* `docker exec` - это команда [Docker для выполнения команд](https://docs.docker.com/engine/reference/commandline/exec/) в запущенном контейнере. Как и команда Docker `run`, существует множество опций для команды `exec`, но мы просто рассмотрим основные моменты для этого примера.
 
-* `-it` - The `-it` flag is actually two flags which are commonly used together. The `-i` flag runs the session in "interactive" mode, meaning the STDIN and STDOUT from your terminal are attached to the container's terminal. The `-t` flag attaches a pseudoterminal to the connection. There's a little more explained in [this Stack Overflow question](https://stackoverflow.com/a/22287905/977192), but suffice it to say, when running `docker exec` bash commands, you will probably want to use the `-it` flags.
+* `-it` - флаг `-it` на самом деле является двумя флагами, которые обычно используются вместе. Флаг `-i` запускает сеанс в «интерактивном» режиме, что означает, что потоки STDIN и STDOUT вашего терминала подключены к терминалу контейнера. Флаг `-t` присоединяет псевдотерминал к соединению. В [этом вопросе на Stack Overflow](https://stackoverflow.com/a/22287905/977192) немного больше объяснено, но достаточно сказать, что при выполнении bash-команд через `docker exec`, вероятно, вы захотите использовать флаги `-it`.
 
-* `weather-db` - This is the name (you could also use the ID) of the running container we want to run our command on.
+* `weather-db` - это имя (вы также можете использовать идентификатор) запущенного контейнера, в который мы хотим запустить нашу команду.
 
-* `bash` - Finally, this is the command that we want to run in the container. [bash](https://en.wikipedia.org/wiki/Bash_(Unix_shell)) is a shell installed in most Linux distributions that allows us to run other programs on the container. If your container doesn't have bash installed, you can [try *sh* instead](http://pubs.opengroup.org/onlinepubs/009695399/utilities/sh.html).
+* `bash` - Наконец, это команда, которую мы хотим запустить в контейнере. [bash](https://ru.wikipedia.org/wiki/Bash) - это командная оболочка, установленная в большинстве дистрибутивов Linux, которая позволяет нам запускать другие программы в контейнере. Если в вашем контейнере нет bash, вы можете [попробовать использовать *sh* вместо него] (http://pubs.opengroup.org/onlinepubs/009695399/utilities/sh.html).
 
 #### MySQL CLI
 
-The [MySQL CLI](https://dev.mysql.com/doc/refman/5.7/en/mysql.html) also provides many options, but here are the three we used:
+[CLI MySQL](https://dev.mysql.com/doc/refman/5.7/en/mysql.html) также предоставляет множество опций, но здесь мы использовали три:
 
-* `mysql` - This is the command used to access MySQL from a terminal. If you've been using MySQL on a VM or your local machine, this is no different.
+* `mysql` - это команда, используемая для доступа к MySQL с терминала. Если вы используете MySQL на виртуальной машине или на вашей локальной машине, это то же самое.
 
-* `--user=admin` - We specify the username here so that MySQL knows we want access as a specific user and not `root`.
+* `--user=admin` - мы указываем имя пользователя, чтобы MySQL знал, что мы хотим получить доступ к базе данных как определенный пользователь, а не `root`.
 
-* `--password` - The password flag instructs MySQL to give us the password prompt. You can also enter the password directly into the command, but it's generally less secure.
+* `--password` - флаг пароля указывает MySQL дать нам приглашение для ввода пароля. Вы также можете ввести пароль непосредственно в команду, но данный способ, как правило, менее безопасен.
 
-#### Exiting MySQL and the Container
+#### Выход из MySQL и контейнера
 
-We're done with the MySQL container for now, so let’s exit and stop the container:
+Мы закончили с контейнером MySQL, так что давайте выйдем и остановим контейнер:
 
-* To exit the MySQL CLI, type `\q` and then press "return".
+* Чтобы выйти из CLI MySQL, введите `\q` и нажмите клавишу ввода.
 
-* Exit the container by typing `exit` and then pressing "return".
+* Выйдите из контейнера, набрав `exit`, а затем нажмите клавишу ввода.
 
-* Stop the container by typing `docker stop weather-db` and then "return" again.
+* Остановите контейнер, набрав `docker stop weather-db`, а затем снова нажмите клавишу ввода.
 
-The whole command line output should look something like this when you're done:
+Весь вывод командной строки должен выглядеть примерно так, когда вы закончите:
 
 {linenos=off, lang=sh}
 ~~~~~~~
@@ -188,33 +188,33 @@ $ docker stop weather-db
 weather-db
 ~~~~~~~
 
-We have now proven that our MySQL container runs and that we can log in to access the database, but how will we keep data saved in the container? What happens when we stop this container? Persistence is important in real-world applications, so in the next section, we'll dive into keeping our data even after our container is long gone.
+Мы убедились, что наш контейнер MySQL работает, и мы можем войти в систему для доступа к базе данных, но как сохранить данные в контейнере? Что происходит, когда мы останавливаем этот контейнер? Постоянное хранение данных важно в реальных приложениях, поэтому в следующем разделе мы погрузимся в сохранение наших данных даже после того, как наш контейнер давно уже нет.
 
-## Retaining Data in Our Database Container
+## Сохранение данных в контейнере нашей базы данных
 
-So far, our database container starts up and automatically creates a database and user. This is fine, but when we connect this database to our PHP application, we'll want to make sure that the database tables and values are saved even after our container stops. If not, we'll have to rebuild the database every time our database container restarts.
+До сих пор наш контейнер базы данных запускается и автоматически создает базу данных и пользователя. Это хорошо, но когда мы подключаем эту базу данных к нашему PHP-приложению, мы хотим убедиться, что таблицы и значения базы данных сохраняются даже после остановки нашего контейнера. В противном случае нам придется пересоздавать базу данных каждый раз, когда перезагружается наш контейнер базы данных.
 
-The best way to save data from containers for local development is by mounting a volume. We saw how effective this was for local development of our PHP code, and the process we follow for mounting our database's data is very similar. When working in a PHP project, I like to mount database volumes from the project directory (in our case, the weather-app/ directory we created earlier), but you can mount the volume from anywhere on your host system.
+Лучший способ сохранить данные из контейнеров для локальной разработки - установить том. Мы видели, насколько эффективно это было для локальной разработки нашего PHP-кода, и процесс, которому мы следуем для монтирования наших данных базы данных, очень похож. Когда я работаю в проекте PHP, мне нравится монтировать тома базы данных из каталога проекта (в нашем случае, каталога `weather-app/`, который мы создали ранее), но вы можете смонтировать том из любой точки хост-системы.
 
-> It's important to note that when mounting volumes from a Mac host computer, there are [performance tradeoffs](https://docs.docker.com/docker-for-mac/osxfs-caching/). These should not be an issue in Linux environments, but I've found that when running mounted volumes in many linked containers, things can get painfully slow. Docker provides [some hints for tuning here](https://docs.docker.com/docker-for-mac/osxfs-caching/).
+> Важно отметить, что при монтировании томов с хост-компьютера Mac есть [негативные побочные эффекты с производительностью](https://docs.docker.com/docker-for-mac/osxfs-caching/). Это не должно быть проблемой в средах Linux, но я обнаружил, что при запуске смонтированных томов во многих связанных контейнерах, все может стать болезненно медленным. Docker предоставляет [определенные советы по настройки](https://docs.docker.com/docker-for-mac/osxfs-caching/).
 
-To start the MySQL container with the database saved to our host system, navigate to your new `weather-app` project directory and type:
+Чтобы запустить контейнер MySQL с базой данных, сохраненной на вашей хост-системе, перейдите в новый каталог проекта `weather-app` и введите команду ниже:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run -d --rm --name weather-db -e MYSQL_USER=admin -e MYSQL_DATABASE=weather -e MYSQL_PASSWORD=p23l%v11p -e MYSQL_RANDOM_ROOT_PASSWORD=true -v $(pwd)/.data:/var/lib/mysql mysql:5.7
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-The only thing we added to this docker run command was -v $(pwd)/.data:/var/lib/mysql. This mounts a volume from our local directory into the MySQL container. A new directory will appear (.data/) and as the database container starts up, folders and files will appear. These are the files that MySQL uses to store your data, and you can view the files being created from your terminal:
+Единственное, что мы добавили в эту команду `docker run` было `-v $(pwd)/.data:/var/lib/mysql`. Это монтирует том из нашего локального каталога в контейнер MySQL. Появится новый каталог (`.data/`), и при запуске контейнера базы данных появятся каталоги и файлы. Это файлы, которые MySQL использует для хранения ваших данных, и вы можете просматривать файлы, созданные из вашего терминала:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ ls -a .data/
 ~~~~~~~
 
-You should see files and folders listed out like this:
+Вы должны увидеть перечисленные ниже файлы и папки:
 
 {linenos=off, lang=text}
 ~~~~~~~
@@ -227,51 +227,51 @@ client-cert.pem     mysql               weather
 client-key.pem      performance_schema
 ~~~~~~~
 
-Don't worry about what each of those mean (although [you can read up on MySQL internals if you're interested](https://dev.mysql.com/doc/internals/en/)). At this point, we just care that MySQL is now using data from our host machine in the container, allowing us to keep the database data even after the container is shut down.
+Не беспокойтесь о том, что означает каждый из них (хотя [вы можете прочитать внутренности MySQL, если вам интересно)(https://dev.mysql.com/doc/internals/en/)). На данный момент нам просто интересно, что MySQL теперь использует данные с нашего хост-компьютера в контейнере, что позволяет нам хранить данные базы данных даже после отключения контейнера.
 
-> Be sure to add the `.data` directory to your .gitignore file so that your database isn't added to version control.
+> Обязательно добавьте каталог `.data` в файл `.gitignore`, чтобы ваша база данных не была добавлена в систему управления версиями.
 
-## Creating a Database Table
+## Создание таблицы базы данных
 
-Since this application just needs to cache the results from the MetaWeather API, the database will just have one table with three columns. We'll call the table `locations` and add columns `id`, `weather`, and `last_updated`.
+Поскольку этому приложению просто нужно кешировать результаты из API MetaWeather, в базе данных будет только одна таблица с тремя столбцами. Мы назовём таблицу `locations` и добавим столбцы `id`, `weather` и` last_updated`.
 
 {width=100%}
-![Diagram 3: Weather Application Database](images/diagram3.png)
+![Диаграмма 3: база данных приложения прогноза погоды](images/diagram3.png)
 
-If the MySQL container is not running, then start it using the method above that mounts data in a volume:
+Если контейнер MySQL не запущен, запустите его, используя команду выше (продублирована далее ниже), которая монтирует данные в томе:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run -d --rm --name weather-db -e MYSQL_USER=admin -e MYSQL_DATABASE=weather -e MYSQL_PASSWORD=p23l%v11p -e MYSQL_RANDOM_ROOT_PASSWORD=true -v $(pwd)/.data:/var/lib/mysql mysql:5.7
 ~~~~~~~
 
-Log into the container and into the MySQL CLI. This time, we're going to do it in just one step:
+Войдите в контейнер и в CLI MySQL. На этот раз мы сделаем это в одно действие:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker exec -it weather-db mysql --user=admin --password=p23l%v11p weather
 ~~~~~~~
 
-Next, we're going to run a SQL command to create the database table we outlined above:
+Затем мы собираемся выполнить приведенную ниже SQL-команду для создания таблицы базы данных:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 mysql> CREATE TABLE locations (id VARCHAR(64) NOT NULL, weather JSON NULL, last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
 ~~~~~~~
 
-It should tell you `Query OK`, but you can check by running `mysql> SHOW TABLES;`. Exit the container and MySQL CLI by typing `\q`.
+Вывод в случае успеха должен быть `Query OK`, но вы можете проверить, что таблица действительно создавалась, запустив `mysql> SHOW TABLES;`. Выйдите из контейнера и MySQL CLI, набрав `\q`.
 
-### What's going on here?
+### Что здесь происходит?
 
-Unlike the last time we logged in to the MySQL command line, this time we cut the process down to just one step. Remember that when running `docker run` or `docker exec`, the last part is the command we want to run in the container. This means that we don't actually have to log into a bash session and then log into MySQL, we can just directly log in to the database CLI.
+В отличие от прошлого раза, когда мы вошли в командную строку MySQL, на этот раз мы сократили процесс до всего лишь одного шага. Помните, что при выполнении `docker run` или` docker exec` последняя часть - это команда, которую мы хотим выполнить в контейнере. Это означает, что нам фактически не нужно начинать сессию bash, а затем входить в MySQL, мы можем просто напрямую войти в CLI базы данных.
 
-This can be done with any command available on the container, so `docker exec` becomes very useful for seeing what's actually going on inside your containers.
+Это можно сделать с помощью любой команды, доступной в контейнере, поэтому `docker exec` становится крайне полезной для просмотра того, что происходит в ваших контейнерах.
 
-## Saving to the Database from our PHP Application
+## Сохранение в базе данных из нашего PHP-приложения
 
-Now that our database is ready to store weather data and it will keep that data even after the container is removed, we need to update our PHP application to connect to and store weather results in the database.
+Теперь, когда наша база данных готова к хранению данных о погоде, и она сохранит эти данные даже после удаления контейнера, нам необходимо обновить наше приложение PHP для подключения и сохранения результатов погоды в базе данных.
 
-Initially, the `index.php` file was getting data directly from the MetaWeather API, but now that we have a storage mechanism in place (ie: our database), let's get the application to save data to the database for repeat requests.
+Первоначально файл `index.php` получал данные непосредственно из API MetaWeather, но теперь, когда у нас есть механизм хранения (т.е. наша база данных), давайте реализуем в приложении возможность сохранять данные в базе данных при повторных запросов.
 
 {title="index.php", linenos=off, lang=php}
 ~~~~~~~
@@ -279,13 +279,13 @@ Initially, the `index.php` file was getting data directly from the MetaWeather A
 
 require 'vendor/autoload.php';
 
-// Create a new Container
+// Создать контейнер
 $container = new \Slim\Container([
-    // Add Guzzle as 'http'
+    // Добавить в контейнер Guzzle под идентификатором 'http'
     'http' => function () {
         return new GuzzleHttp\Client();
     },
-    // Add mysqli as 'mysql'
+    // Добавить в контейнер mysqli под идентификатором 'mysql'
     'mysql' => function () {
         $mysqli = new mysqli(
             "weather-db",
@@ -294,24 +294,23 @@ $container = new \Slim\Container([
             "weather"
         );
         if ($mysqli->connect_errno) {
-            echo "Failed to connect to MySQL: " . $mysqli->connect_error;
+            echo "Не удалось подключиться к MySQL: " . $mysqli->connect_error;
             exit;
         } else {
             return $mysqli;
         }
     },
 ]);
-// Instantiate the App object
+// Создать объект App
 $app = new \Slim\App($container);
 
-// Get weather by location ID
+// Получить погоду по идентификатору местоположения
 $app->get('/locations/{id}', function ($request, $response, $args) {
-
-    // Get the location from the database
+    // Получить местоположение из базы данных
     $id = $this->mysql->real_escape_string($args['id']);
     $results = $this->mysql->query("SELECT * FROM locations WHERE id='{$id}'");
 
-    // If location found, then show it from the DB, otherwise, query MetaWeather
+    // Если местоположение найдено, тогда получить прогноз погоды из БД, в противном случае сделать запрос к MetaWeather
     if ($results->num_rows > 0) {
         $result = $results->fetch_assoc()['weather'];
     } else {
@@ -320,39 +319,39 @@ $app->get('/locations/{id}', function ($request, $response, $args) {
             ->getContents();
         $cleanResult = $this->mysql->real_escape_string($result);
         if (!$this->mysql->query("INSERT into locations (id, weather) VALUES ('{$id}', '{$cleanResult}')")) {
-            throw new Exception("Location could not be updated.");
+            throw new Exception("Местоположение не может быть обновлено.");
         }
     }
 
-    // Return the results as JSON
+    // Возвратить результаты в формате JSON
     return $response->withStatus(200)->withJson(json_decode($result));
 });
 
-// Run the application
+// Запуск приложения
 $app->run();
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-We've added two important things to our `index.php` file above. First, we updated the `$container` variable:
+Только что мы добавили два важных изменения в наш файл `index.php`. Сначала мы обновили переменную `$container`:
 
 {title="index.php", linenos=off, lang=php}
 ~~~~~~~
 $container = new \Slim\Container([
-    // Add Guzzle as 'http'
+    // Добавить в контейнер Guzzle под идентификатором 'http'
     'http' => function () {
         return new GuzzleHttp\Client();
     },
-    // Add mysqli as 'mysql'
+    // Добавить в контейнер mysqli под идентификатором 'mysql'
     'mysql' => function () {
         $mysqli = new mysqli(
-            "weather-db",   // The database host
-            "admin",        // The database user
-            "p23l%v11p",    // The database password
-            "weather"       // The database name
+            "weather-db",   // Хост базы данных
+            "admin",        // Пользователь базы данных
+            "p23l%v11p",    // Пароль базы данных
+            "weather"       // Имя базы данных
         );
         if ($mysqli->connect_errno) {
-            echo "Failed to connect to MySQL: " . $mysqli->connect_error;
+            echo "Не удалось подключиться к MySQL: " . $mysqli->connect_error;
             exit;
         } else {
             return $mysqli;
@@ -361,21 +360,20 @@ $container = new \Slim\Container([
 ]);
 ~~~~~~~
 
-Guzzle is the same, but we've also added an element to the array named `'mysql'`. This callback instantiates [MySQLi](http://php.net/manual/en/book.mysqli.php) with hard-coded database credentials.
+Guzzle остался таким же, но мы добавили элемент с именем `mysql` в массив. Этот колбэк создает [MySQLi](http://php.net/manual/ru/book.mysqli.php) с жестко заданными учетными данными базы данных.
 
-> Hard-coding your database credentials like this is not a good idea in a real application. We'll cover a more secure way to include credentials via environmental variables in Docker in the last section of this chapter. In the meantime, don't commit this to a public repository unless you plan on changing your database password.
+> Жестко заданные учетные данные вашей базы данных, как это сделано в примере выше — плохая идея в реальном приложении. Мы рассмотрим более безопасный способ включения учетных данных через переменные окружения в Docker в последнем разделе этой главы. Пока же не делайте коммит с такими изменениями в публичном репозитории, если вы не планируете менять свой пароль базы данных.
 
-The other major update to the file is the `GET /locations` endpoint:
+Другим большим обновлением файла является конечная точка `GET /locations`:
 
 {title="index.php", linenos=off, lang=php}
 ~~~~~~~
 $app->get('/locations/{id}', function ($request, $response, $args) {
-
-    // Get the location from the database
+    // Получить местоположение из базы данных
     $id = $this->mysql->real_escape_string($args['id']);
     $results = $this->mysql->query("SELECT * FROM locations WHERE id='{$id}'");
 
-    // If location found, show it from DB, otherwise, query MetaWeather
+    // Если местоположение найдено, тогда получить прогноз погоды из БД, в противном случае сделать запрос к MetaWeather
     if ($results->num_rows > 0) {
         $result = $results->fetch_assoc()['weather'];
     } else {
@@ -384,100 +382,99 @@ $app->get('/locations/{id}', function ($request, $response, $args) {
             ->getContents();
         $cleanResult = $this->mysql->real_escape_string($result);
         if (!$this->mysql->query("INSERT into locations (id, weather) VALUES ('{$id}', '{$cleanResult}')")) {
-            throw new Exception("Location could not be updated.");
+            throw new Exception("Местоположение не может быть обновлено.");
         }
     }
 
-    // Return the results as JSON
+    // Возвратить результаты в формате JSON
     return $response->withStatus(200)->withJson(json_decode($result));
 });
 ~~~~~~~
 
-While the comments in the code may help, it's worth adding some more detail in case you're not familiar with MySQLi:
+Хотя комментарии в коде могут помочь, стоит несколько более подробно расписать, что происходит, в случае если вы не знакомы с MySQLi:
 
-* `$id = $this->mysql->real_escape_string($args['id']);` - First, we escape the `id` passed in through the endpoint's `$args` variable. This is a good idea anytime you're taking user or third-party input as they might accidentally (or intentionally) inject SQL statements that break your code.
+* `$id = $this->mysql->real_escape_string($args['id']);` - для начала мы экранируем значение элемента `id` массива `$args`, доступного в конечной точки. Это хорошая идея в любое время, когда вы принимаете пользовательский или сторонний ввод, поскольку он может случайно (или преднамеренно) вводить SQL-выражения, которые ломают ваш код.
 
-* `$results = $this->mysql->query("SELECT * FROM locations WHERE id='{$id}'");` - While I would typically [use an ORM](https://stackoverflow.com/a/1279678) for a real application, this simple two-endpoint example didn't seem to warrant it. Instead, we're using [MySQLi - a PHP extension for accessing MySQL -](http://php.net/manual/en/book.mysqli.php) to query the database. This allows us to write raw SQL with PHP variables embedded.
+* `$results = $this->mysql->query("SELECT * FROM locations WHERE id='{$id}'");` - хотя я обычно [использовал ORM](https://stackoverflow.com/a/1279678) для реального приложения, для такого простого примера с двумя конечными точками это, очевидно, было бы излишне. Поэтому мы используем [MySQLi - PHP-расширение для доступа к MySQL](http://php.net/manual/ru/book.mysqli.php) для выполнения запроса к базе данных. Это позволяет нам писать необработанный SQL-запрос с внедренными в него PHP-переменными.
 
-* `if ($results->num_rows > 0) {...}` - If we find at least one result for this location ID, we should return the result from the database. If not, we'll continue on...
+* `if ($results->num_rows > 0) {...}` - если мы найдем хотя бы один результат для этого идентификатора местоположения, нам нужно вернуть результат из базы данных. Если нет, то мы переходим в альтернативную ветвь...
 
-* `else { ... $this->mysql->query("INSERT into locations (id, weather) VALUES ('{$id}', '{$cleanResult}')") ...` - If we did not find a result for this location ID in the database, we're getting it from the MetaWeather API, escaping the JSON string, and then inserting the result into the database.
+* `else { ... $this->mysql->query("INSERT into locations (id, weather) VALUES ('{$id}', '{$cleanResult}')") ...` - если мы не нашли результата по этому идентификатору местоположения в базе данных, то получаем его из API MetaWeather, экранируя JSON-строку, а затем вставляем результат в базу данных.
 
-* `return $response->withStatus(200)->withJson(json_decode($result));` - Just as we did before, we're returning any result as JSON to the user.
+* `return $response->withStatus(200)->withJson(json_decode($result));` - как и раньше, мы возвращаем пользователю результат в формате JSON.
 
-## Linking the PHP Container
+## Связывание контейнера PHP
 
-With the code in place, now we need to run a new PHP container linked to the MySQL database container we just started:
+С созданным кодом теперь нам нужно запустить новый контейнер PHP, связанный с контейнером базы данных MySQL, который мы только что начали:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run -d --rm --name=weather-app -p 38000:80 -v $(pwd):/var/www/html --link weather-db shiphp/weather-app
 ~~~~~~~
 
-### What's going on here?
+### Что здесь происходит?
 
-There are two new parts to this docker run command:
+В этой команде `docker run` есть две новые части:
 
-* `--link weather-db` - This links the container named `weather-db` to this container. You can also [give the linked container an alias](https://docs.docker.com/engine/reference/run/#expose-incoming-ports) for use within the PHP container, but we're not going to need to do that here.
+* `--link weather-db` - это связывает контейнер с именем `weather-db` с этим контейнером. Вы также можете [предоставить связанному контейнеру псевдоним](https://docs.docker.com/engine/reference/run/#expose-incoming-ports) для использования внутри PHP-контейнера, но нам не понадобятся делать это здесь.
 
-* `shiphp/weather-app` - Instead of using the `php:apache` image we used in the previous chapter, we're using the new Docker image we built at the beginning of this chapter. The reason for this is that we need the PHP MySQLi extension that we added in our custom Dockerfile.
+* `shiphp/weather-app` - вместо использования образа `php:apache`, который мы использовали в предыдущей главе, используем новый Docker-образ, которое мы собрали в начале этой главы. Причина этого в том, что нам нужно расширение PHP MySQLi, которое мы добавили в наш файл `Dockerfile`.
 
-Now that the PHP container is up and running, you should be able to navigate to a location ID like the following:
+Теперь, когда наш PHP-контейнер запущен и работает, у вас есть возможность перейти к идентификатору местоположения, например:
 
 `GET http://localhost:38000/index.php/locations/2487956`
 
-The first time you load this URL, it will probably take a second or two to load, but if you refresh the page, you should see a dramatically faster result. Mine loaded in less than 150 ms! That's thanks to the caching we just set up by saving the result in the database.
+При первой загрузке этого URL-адреса, вероятно, потребуется пара секунд, но если вы обновите страницу, то почувствуете значительно более быстрое получение результата. У меня загрузка заняла менее 150 мс! Это благодаря кешированию, которое мы просто реализовали, сохраняя результат в базе данных.
 
-## Deleting Data
+## Удаление данных
 
-In order to remove data from the database, we'll add a second endpoint. Add the following just after the `$app->get(...);` endpoint to allow users to delete a location from the database:
+Для удаления данных из базы данных, мы добавим вторую конечную точку. Добавьте следующий код сразу после конечной точки `$app->get(...);`, чтобы пользователи могли удалять местоположение из базы данных:
 
-#### index.php (partial)
+#### index.php (частичный)
 
 {title="index.php", linenos=off, lang=php}
 ~~~~~~~
 $app->delete('/locations/{id}', function ($request, $response, $args) {
-
-    // Get the location from the database
+    // Получить местоположение из базы данных
     $id = $this->mysql->real_escape_string($args['id']);
     $results = $this->mysql->query("SELECT * FROM locations WHERE id='{$id}'");
 
-    // If it exists, delete it, otherwise send a 404
+    // Если существует, удалить местоположение, в противном случае отправить ответ с кодом состояния 404
     if (
         $results->num_rows > 0 &&
         $this->mysql->query("DELETE FROM locations WHERE id='{$id}'")
     ) {
-        return $response->withStatus(200)->write("Location {$args['id']} deleted.");
+        return $response->withStatus(200)->write("Удалено местоположение {$args['id']}.");
     } else {
-        return $response->withStatus(404)->write("Location {$args['id']} not found.");
+        return $response->withStatus(404)->write("Местоположение {$args['id']} не найдено.");
     }
 });
 
-// Run the application
+// Запуск приложения
 $app->run();
 ~~~~~~~
 
-Now you can use [cURL](https://www.garron.me/en/bits/curl-delete-request.html) or [Postman](https://www.getpostman.com/) to make a `DELETE` call to the same location endpoint you did above. For example:
+Теперь вы можете использовать [cURL](https://www.garron.me/en/bits/curl-delete-request.html) или [Postman](https://www.getpostman.com/), чтобы выполнить запрос `DELETE` на ту же самую конечную точку местоположения, которую мы только что создали. Например:
 
 `DELETE http://localhost:38000/index.php/locations/2487956`
 
-You should see a message `Location 2487956` deleted. and now when you make a `GET` request to that URL again, you'll wait longer as the result must come from the MetaWeather API.
+Вы должны увидеть сообщение `Удалено местоположение 2487956` и теперь, когда вы снова сделаете запрос `GET` на этот URL, вы будете ждать дольше, поскольку результат должен прийти из API MetaWeather.
 
-## Managing Environmental Variables
+## Управление переменными окружения
 
-The last topic we'll cover in this chapter is managing environmental variables in Docker. Docker allows you to specify environmental variables at runtime, so that your PHP code can access these variables, but you won't have to hard-code them as we did above.
+Последняя тема, которую мы рассмотрим в этой главе, - это управление переменными окружения в Docker. Docker позволяет вам указывать переменные окружения во время выполнения, чтобы ваш PHP-код мог иметь доступ к этим переменным, но вам не придется жестко задавать их, как это было сделано выше.
 
-First, we'll need to change the code that specifies our database credentials in the `index.php` file:
+Прежде всего нам нужно будет изменить код, определяющий наши учетные данные в файле `index.php`:
 
 {title="index.php", linenos=off, lang=php}
 ~~~~~~~
-// Create a new Container
+// Создать контейнер
 $container = new \Slim\Container([
-    // Add Guzzle as 'http'
+    // Добавить в контейнер Guzzle под идентификатором 'http'
     'http' => function () {
         return new GuzzleHttp\Client();
     },
-    // Add mysqli as 'mysql'
+    // Добавить в контейнер mysqli под идентификатором 'mysql'
     'mysql' => function () {
         $mysqli = new mysqli(
             getenv('DATABASE_HOST'),
@@ -486,7 +483,7 @@ $container = new \Slim\Container([
             getenv('DATABASE_NAME')
         );
         if ($mysqli->connect_errno) {
-            echo "Failed to connect to MySQL: " . $mysqli->connect_error;
+            echo "Не удалось подключиться к MySQL: " . $mysqli->connect_error;
             exit;
         } else {
             return $mysqli;
@@ -495,31 +492,31 @@ $container = new \Slim\Container([
 ]);
 ~~~~~~~
 
-Stop the PHP container, and re-run it using this command:
+Остановите контейнер PHP и повторно запустите его с помощью следующей команды:
 
 {linenos=off, lang=sh}
 ~~~~~~~
 $ docker run -d --rm --name=weather-app -p 38000:80 -v $(pwd):/var/www/html --link weather-db -e DATABASE_HOST='weather-db' -e DATABASE_USER='admin' -e DATABASE_PASSWORD='p23l%v11p' -e DATABASE_NAME='weather' shiphp/weather-app
 ~~~~~~~
 
-Now you can safely share your PHP code without revealing your database login credentials.
+Теперь вы можете безопасно делиться своим PHP-кодом, не раскрывая учетные данные для входа в базу данных.
 
-### What's going on here?
+### Что здесь происходит?
 
-PHP can read environmental variables from the operating system [using the getenv function](http://php.net/manual/en/function.getenv.php), and when we use this function in a container, the effect is the same. Instead of reading environmental variables from the host operating system (ie: your computer), it read environmental variables from the Docker container running the code. This helps with security - different containers aren't sharing environmental variables - and it helps make sharing code easier.
+PHP может считывать переменные окружения из операционной системы [используя функцию getenv](http://php.net/manual/ru/function.getenv.php), и когда мы используем эту функцию в контейнере, результат тот же самый. Вместо чтения переменных окружения из операционной системы хоста (например, вашего компьютера), он считывает переменные окружения из контейнера Docker, на котором запущен код. Это способствует безопасности, потому что разные контейнеры не используют переменные среды, и это помогает упростить обмен кода.
 
-The updated `docker run` command now includes four -e flags that translate to environmental variables in the container. Now, your PHP application will read the environmental variables you set when you run the container instead of hard-coded values or values from your host machine.
+Обновленная команда `docker run` теперь включает в себя четыре флага `-e`, которые преобразуются в переменные окружения в контейнере. Теперь ваше PHP-приложение будет считывать переменные среды, которые вы устанавливаете при запуске контейнера вместо жестко заданных значений или значений с вашего хост-машины.
 
-> If you don't want to have to type long commands like this in every time you run your container, you can use Docker Compose and/or an .env file instead. This is covered in [this blog post](https://www.shiphp.com/blog/2017/env-php-docker).
+> Если вы не хотите вводить длинные команды, похожие на указанные выше, каждый раз, когда вы запускаете свой контейнер, вы можете использовать Docker Compose и/или файл `.env`. Это описано в [этом gjcnt в блоге](https://www.shiphp.com/blog/2017/env-php-docker).
 
-Finally, you can see the environmental variables your container is using:
+Наконец, вы можете увидеть переменные среды, которые использует ваш контейнер, используя команду ниже:
 
 {linenos=off, lang=sh}
 ~~~~~~~
-$ docker inspect weather-app</td>
+$ docker inspect weather-app
 ~~~~~~~
 
-The JSON returned from this command gives you a lot of information about a running container, but for this example, we just care about the array at `Config.Env`:
+Возвращенный JSON из этой команды даст вам много информации о запущенном контейнере, но для этого примера нам нужен только информация в массиве `Config.Env`:
 
 {linenos=off, lang=php}
 ~~~~~~~
@@ -534,4 +531,4 @@ The JSON returned from this command gives you a lot of information about a runni
 //...
 ~~~~~~~
 
-If everything worked correctly, you should now be able to access the application as before. In the next chapter, we'll take a quick look at how we might improve this application using advanced Docker topics. If you want to take a look at the complete source code for this app, it's [available on Github](https://github.com/shiphp/weather-app).
+Если все работает правильно, теперь у вас есть доступ к приложению, как и раньше. В следующей главе мы быстро рассмотрим, как мы можем улучшить это приложение, используя продвинутые темы Docker. Если вы хотите взглянуть на полный исходный код этого приложения, то вы можете найти его [на GitHub](https://github.com/shiphp/weather-app).
