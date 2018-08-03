@@ -1,5 +1,5 @@
-# Final Words
+# Заключение
 
-I hope that reading and working through this book has piqued your interest in Docker and given you the confidence to start using it regularly for local development. I have found that the best way for me to learn something new is to just start building things, and Docker has been no different. When I decided that Docker was how I would build PHP apps, I uninstalled my virtual machine and went all-in. While you may not be ready to do that just yet, forcing yourself to solve problems with Docker will make you get better at it.
+Надеюсь, что чтение и работа c этой книгой вызвало у вас интерес к Docker и принесло уверенность для того, чтобы регулярно применять его в локальной разработке. Я обнаружил, что лучший способ для меня узнать что-то новое — это просто начать работать, и Docker не отличается от этого подхода. Когда я решил, что Docker — это то, как я буду создавать PHP-приложения, я удалил свою виртуальную машину и целиком погрузился в Docker. Хотя вы, возможно, еще не готовы сделать это, но заставив себя решать проблемы с помощью Docker вы почувствуете себя лучше в нём.
 
-Finally, if you have feedback for this book, questions for me, or you're interested in PHP or Docker books or training, my contact information is available at [shiphp.com](https://www.shiphp.com/). Thanks for reading!
+Наконец, если у вас есть есть замечания и предложения по этой книге, вопросы ко мне или вас интересуют книги или обучение PHP или Docker, моя контактная информация доступна на сайта [shiphp.com](https://www.shiphp.com/). Спасибо за прочтение!
