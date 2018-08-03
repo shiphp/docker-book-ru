@@ -1,41 +1,41 @@
-# Chapter 5. Next Steps
+# Глава 5. Следующие шаги
 
-At this point, our application is working and we can retrieve weather results from the API or from our database cache, but there's still a lot more to learn. Building one demo application won't make you an expert with Docker, so let's take a look at some things we might do to continue to improve this application and learn more about Docker.
+На данном этапе наше приложение работает, и мы можем извлекать данные о погоде из API или из нашего кеша, которым служит база данных, но еще многое предстоит узнать. Создание одного демонстрационного приложения не сделает вас экспертом в Docker, поэтому давайте взглянем на кое-что другое, что мы можем сделать, чтобы продолжить улучшение этого приложения и узнать больше о Docker.
 
-## Further Development
+## Дальнейшая разработка
 
-### Clean up long Docker commands
+### Убрать длинные Docker-команды
 
-Right now, starting and stopping our container is an arduous process and quite prone to error. I'm guessing you don't want to type `docker run -d --rm --name=weather-app -p 38000:80 -v $(pwd):/var/www/html --link weather-db -e DATABASE_HOST='weather-db' -e DATABASE_USER='admin' -e DATABASE_PASSWORD='p23l%v11p' -e DATABASE_NAME='weather' shiphp/weather-app` every time you want to start editing your code, but you can pretty easily avoid this by writing [npm scripts](https://docs.npmjs.com/cli/run-script), [bash commands](http://tldp.org/LDP/abs/html/), or PHP scripts.
+Сейчас запуск и остановка нашего контейнера - сложный процесс и довольно склонный к ошибке. Я предполагаю, что вы не хотите вводить каждый раз `docker run -d --rm --name=weather-app -p 38000:80 -v $(pwd):/var/www/html --link weather-db -e DATABASE_HOST='weather-db' -e DATABASE_USER='admin' -e DATABASE_PASSWORD='p23l%v11p' -e DATABASE_NAME='weather' shiphp/weather-app`, когда вы хотите начать работать над своим кодом, но вы можете довольно легко избежать этого, написав [npm-скрипты](https://docs.npmjs.com/cli/run-script), [bash-команды](http://tldp.org/LDP/abs/html/) или PHP-скрипты.
 
 ### Docker Compose
 
-Another way to clean up our Docker workflow is to use [Docker Compose](https://docs.docker.com/compose/). Compose will allow us to write a single configuration file that starts all of our containers and links them together automatically. No more typing two or three commands just to get our app running - plus, a Docker Compose file can be used to host our containers in a [Docker Swarm](https://docs.docker.com/swarm/).
+Другой способ привести в порядок рабочий процесс Docker — использовать [Docker Compose](https://docs.docker.com/compose/). Compose позволит нам написать один файл конфигурации, который запускает все наши контейнеры и связывает их вместе автоматически. Больше не нужно вводить две или три команды только для того, чтобы запустить приложение. Кроме того, файл Docker Compose можно использовать для размещения наших контейнеров в [Docker Swarm](https://docs.docker.com/swarm/).
 
-### Hosting
+### Хостинг
 
-This walkthrough has focused on local development with Docker, but you can also host highly scalable and available web applications in Docker containers. There's no end to the number of ways you can configure applications to run in the cloud, but look into [Docker Swarm](https://docs.docker.com/engine/swarm/), [Kubernetes](https://kubernetes.io/), [Amazon EC2](https://aws.amazon.com/ec2/), and [Hyper.sh](https://hyper.sh/) for just a few options.
+В этом руководстве основное внимание уделяется локальной разработке с помощью Docker, но вы также можете размещать высокомасштабируемые и доступные веб-приложения в контейнерах Docker. Нет конца количеству способов, которыми вы можете настроить приложения для работы в облаке, но посмотрите на [Docker Swarm](https://docs.docker.com/engine/swarm/), [Kubernetes](https://kubernetes.io/), [Amazon EC2](https://aws.amazon.com/ec2/) и [Hyper.sh](https://hyper.sh/) — это только несколько вариантов.
 
-### Accessing our database externally
+### Доступ к базе данных извне
 
-Right now, our application's database is only accessible from the container, but what if we want to browse it with a tool like [Datagrip](https://www.jetbrains.com/datagrip/), [phpMyAdmin](https://www.phpmyadmin.net/), or [Sequel Pro](https://www.sequelpro.com/)? We'll have to expose a port and consider the security implications of doing so.
+В настоящее время база данных нашего приложения доступна только из контейнера, но что, если мы хотим просмотреть его с помощью графического инструмента, такого как [Datagrip](https://www.jetbrains.com/datagrip/), [phpMyAdmin](https://www.phpmyadmin.net/) или [Sequel Pro](https://www.sequelpro.com/)? Нам придется открыть порт и продумать все аспекты безопасности.
 
-### Testing and continuous integration
+### Тестирование и непрерывная интеграция
 
-I'm a huge advocate for testing and continuous integration, and one of Docker's advantages is that it can make tests faster and more reproducible across environments. My favorite tool for continuous integration is [Codeship](https://codeship.com/), but Docker works with [Jenkins](https://jenkins.io/), [Travis](https://travis-ci.org/), and most other CI platforms as well.
+Я огромный сторонник тестирования и непрерывной интеграции, и одним из преимуществ Docker является то, что он может сделать тесты более быстрыми и более воспроизводимыми в разных окружениях. Мой любимый инструмент для непрерывной интеграции это [Codeship](https://codeship.com/), но Docker работает с [Jenkins](https://jenkins.io/), [Travis](https://travis-ci.org/)) и с большинством других платформ CI.
 
-### Reading and saving logs
+### Чтение и сохранение логов
 
-Finally, debugging your PHP application in Docker via the logs is probably a necessary step for any real-world app. Docker has a powerful [logs](https://docs.docker.com/engine/reference/commandline/logs/) command that we haven't covered yet.
+Наконец, отладка вашего приложения PHP в Docker с помощью логов, видимо, является необходимым шагом для любого реального приложения. Docker имеет мощную команду [logs](https://docs.docker.com/engine/reference/commandline/logs/), которую мы еще не рассмотрели.
 
-## Resources
+## Ресурсы
 
-While this book doesn't cover the above topics in detail, there are many great free resources available for learning Docker in more depth. Some of them include:
+Хотя эта книга не затрагивает вышеуказанные темы подробно, существует множество отличных бесплатных ресурсов по обучению Docker более глубоко. Некоторые из них:
 
-* [The official Docker Documentation](https://docs.docker.com/) - The documentation is a bit dry, but you should definitely bookmark it as a reference. I find myself keeping this in an open tab almost all the time.
+* [Официальная документация по Docker](https://docs.docker.com/) — документация немного сухая, но вы обязательно должны добавить её в закладки в качестве справочника. Я постоянно держу её открытой в своём браузере.
 
-* [Stack Overflow](https://stackoverflow.com/questions/tagged/docker) - Very specific questions can be found here, but some of the more popular questions will also reveal helpful best practices in their answers.
+* [Stack Overflow](https://stackoverflow.com/questions/tagged/docker) — здесь можно найти весьма специфичные вопросы, но в некоторых из наиболее популярных вопросов можно найти полезные передовые практики в своих ответах.
 
-* [The New Stack's Docker Book Series](https://thenewstack.io/ebookseries/) - Good for an overview of terminology and tools available for developing with Docker. This book series is pretty high-level.
+* [Серия бесплатных книг по Docker от The New Stack](https://thenewstack.io/ebooks/) - Хорошо для обзора терминологии и инструментов, доступных для разработки с помощью Docker. Эта серия книг довольно высокого уровня.
 
-In addition, we regularly post Docker tips and tutorials on the [shiphp.com blog](https://www.shiphp.com/#blog). Posts there relate to building PHP applications on Docker using specific frameworks like Wordpress or Laravel as well as general PHP topics and updates on the language.
+Кроме того, мы регулярно публикуем советы и руководства по Docker в блоге [shiphp.com](https://www.shiphp.com/#blog). ПОсты там связаны с созданием PHP-приложений на Docker с использованием определенных фреймворков, таких как WordPress или Laravel, а также общие темы по PHP и обновления языка.
