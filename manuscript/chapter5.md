@@ -6,7 +6,7 @@
 
 ### Убрать длинные Docker-команды
 
-Сейчас запуск и остановка нашего контейнера - сложный процесс и довольно склонный к ошибке. Я предполагаю, что вы не хотите вводить каждый раз `docker run -d --rm --name=weather-app -p 38000:80 -v $(pwd):/var/www/html --link weather-db -e DATABASE_HOST='weather-db' -e DATABASE_USER='admin' -e DATABASE_PASSWORD='p23l%v11p' -e DATABASE_NAME='weather' shiphp/weather-app`, когда вы хотите начать работать над своим кодом, но вы можете довольно легко избежать этого, написав [npm-скрипты](https://docs.npmjs.com/cli/run-script), [bash-команды](http://tldp.org/LDP/abs/html/) или PHP-скрипты.
+Сейчас запуск и остановка нашего контейнера — сложный процесс и довольно склонный к ошибке. Я предполагаю, что вы не хотите вводить каждый раз `docker run -d --rm --name=weather-app -p 38000:80 -v $(pwd):/var/www/html --link weather-db -e DATABASE_HOST='weather-db' -e DATABASE_USER='admin' -e DATABASE_PASSWORD='p23l%v11p' -e DATABASE_NAME='weather' shiphp/weather-app`, когда вы хотите начать работать над своим кодом, но вы можете довольно легко избежать этого, написав [npm-скрипты](https://docs.npmjs.com/cli/run-script), [bash-команды](http://tldp.org/LDP/abs/html/) или PHP-скрипты.
 
 ### Docker Compose
 
@@ -36,6 +36,6 @@
 
 * [Stack Overflow](https://stackoverflow.com/questions/tagged/docker) — здесь можно найти весьма специфичные вопросы, но в некоторых из наиболее популярных вопросов можно найти полезные передовые практики в своих ответах.
 
-* [Серия бесплатных книг по Docker от The New Stack](https://thenewstack.io/ebooks/) - Хорошо для обзора терминологии и инструментов, доступных для разработки с помощью Docker. Эта серия книг довольно высокого уровня.
+* [Серия бесплатных книг по Docker от The New Stack](https://thenewstack.io/ebooks/) — хорошо подходит для обзора терминологии и инструментов, доступных для разработки с помощью Docker. Эта серия книг довольно высокого уровня.
 
-Кроме того, мы регулярно публикуем советы и руководства по Docker в блоге [shiphp.com](https://www.shiphp.com/#blog). ПОсты там связаны с созданием PHP-приложений на Docker с использованием определенных фреймворков, таких как WordPress или Laravel, а также общие темы по PHP и обновления языка.
+Кроме того, мы регулярно публикуем советы и руководства по Docker в блоге [shiphp.com](https://www.shiphp.com/#blog). Посты там связаны с созданием PHP-приложений на Docker с использованием определенных фреймворков, таких как WordPress или Laravel, а также общие темы по PHP и обновления языка.
