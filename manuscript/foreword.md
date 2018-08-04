@@ -1,30 +1,32 @@
-# Foreword
+# Предисловие
 
-## About the Book
+## О книге
 
-Docker has quickly become the container engine of choice, and it may be replacing a virtual machine near you soon. This book offers a step-by-step guide to walk you through building your first real PHP web application using Docker while explaining the basics of the platform along the way.
+Docker быстро превратился в выбор для движка контейнеров, и в ближайшем времени он может заменить виртуальную машину. В этой книге приводится пошаговое руководство, которое поможет вам создать первое реальное веб-приложение на PHP с помощью Docker, объясняя основы платформы на этом пути.
 
-The application we build in this eBook will do many of the key things web developers need to do on a daily basis, including:
+Приложение, которое мы создаем в этой книге, будет содержать такие основные возможности, реализуемые ежедневно веб-разработчиками, в их числе:
 
-- Installing dependencies using Composer.
-- Getting data from a third-party API.
-- Saving data to a MySQL database.
-- Using a web framework (SlimPHP) for routing.
-- Storing environmental variables securely.
-- And much more.
+- Установка зависимостей с помощью Composer.
+- Получение данных из стороннего API.
+- Сохранение данных в базу данных MySQL.
+- Использование веб-фреймворка (SlimPHP) для маршрутизации.
+- Безопасное хранение переменных окружения.
+- И многое другое.
 
-## About the Author
+## Об авторе
 
-[Karl Hughes](https://www.karllhughes.com/) has been building PHP web applications for education technology companies since 2011. He went to the University of Tennessee and graduated with a major in Mechanical Engineering, a minor in Business Administration, and a passion for writing both prose and software.
+[Карл Хьюз (Karl Hughes)](https://www.karllhughes.com/) с 2011 года разрабатывает веб-приложения на PHP для образовательных технологических компаний. Он поступил в Университет Теннесси и окончил его по специальности машиностроение, и дополнительно в области делового администрирования, также имеет страсть к написанию прозы и программного обеспечения.
 
-In addition to blogging at [www.karllhughes.com](http://www.karllhughes.com) and [www.shiphp.com](http://www.shiphp.com) he has contributed to Codeship's Blog, php[architect] magazine, and regularly speaks at meetups and conferences. He currently lives in Chicago and works as the Chief Technology Officer at [The Graide Network](https://www.thegraidenetwork.com/).
+В дополнение к ведению блога на [www.karllhughes.com](http://www.karllhughes.com) и [www.shiphp.com](http://www.shiphp.com) он публиковал статьи в блог Codeship, журнал php[architect], и регулярно выступает на собраниях и конференциях. В настоящее время он живет в Чикаго и работает главным инженером в [The Graide Network](https://www.thegraidenetwork.com/).
 
-## About the License
+## О лицензии
 
-© 2017, Karl Hughes
+© 2017, Карл Хьюз
 
-Originally published October, 2017
+Первоначально опубликовано в октябре 2017 года
 
-This edition published January, 2018
+Это издание опубликовано в январе 2018 года
 
-All rights reserved. No part of this book may be reproduced in any form or by any electronic or mechanical means, without permission in writing from the copyright owner. Contact Karl Hughes ([karl@portablecto.com](mailto:karl@portablecto.com)) with any questions or comments on this work.
+Перевод на русский опубликован в августе 2018 года
+
+Все права защищены. Никакая часть этой книги не может быть воспроизведена в какой-либо форме или любыми электронными или механическими средствами без письменного разрешения владельца авторских прав. Свяжитесь с Карлом Хьюзом([karl@portablecto.com](mailto: karl@portablecto.com)) по любым вопросам или комментариям к этой книге.
