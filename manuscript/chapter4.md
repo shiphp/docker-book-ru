@@ -8,8 +8,6 @@
 
 В корне вашего проекта `weather-app`, рядом с файлом `index.php`, создайте новый файл с названием `Dockerfile`. У файлов `Dockerfile` не имеют расширения и используются Docker для конфигурации и настройки образов. У всех образов на [Docker Hub](https://hub.docker.com/) есть файл с таким названием, и обычно вы можете найти их на GitHub. [Файлы `Dockerfile` для PHP находятся здесь](https://github.com/docker-library/php), но они могут быть немного запутанными, поскольку они строятся друг на друге. Наш `Dockerfile` будет гораздо проще:
 
-#### Dockerfile
-
 {title="Dockerfile", linenos=off, lang=sh}
 ~~~~~~~
 FROM php:apache
